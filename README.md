@@ -1,6 +1,6 @@
 # Continuous Cognition, Failure-Atomic Actuation
 
-[![Release](https://img.shields.io/badge/release-v0.1.0-2E7D5B)](RELEASE_NOTES.md)
+[![Release](https://img.shields.io/badge/release-v0.1.1-2E7D5B)](RELEASE_NOTES.md)
 [![Code license](https://img.shields.io/badge/code-Apache--2.0-2C6E9F)](LICENSE)
 [![Paper license](https://img.shields.io/badge/paper-CC%20BY%204.0-B94343)](LICENSES/CC-BY-4.0.txt)
 
@@ -30,12 +30,13 @@ any call to executable history or dispatch.
 | Completed narrative retained after rejection | No | Yes |
 | Ambiguous execution reported as unknown | No | Yes |
 
-A pinned probe of six released Python framework surfaces found partial
-admission in five. The tested LlamaIndex core type structurally rejected raw
-malformed arguments; provider-adapter behavior remains unresolved. This is a
-convenience sample, not an ecosystem-wide prevalence estimate.
+A bounded probe observed partial admission on all five pinned executable paths
+tested. A separately tested LlamaIndex typed core boundary rejected raw
+malformed arguments; provider-adapter behavior remains unresolved. These are
+exact source-bound observations, not a claim that five frameworks are
+vulnerable and not an ecosystem-wide prevalence estimate.
 
-![Framework prevalence](figures/framework_prevalence.svg)
+![Framework surface behavior](figures/framework_surface_probe.svg)
 
 ## Read the Paper
 
@@ -65,15 +66,20 @@ python scripts/build_manifest.py
 The framework probe has a larger isolated dependency set:
 
 ```bash
-python -m venv .venv-frameworks
-. .venv-frameworks/bin/activate
-python -m pip install -r artifact/framework_prevalence_requirements.txt
-python artifact/run_framework_prevalence.py
+uv venv --python 3.11 .venv-frameworks
+uv pip sync --python .venv-frameworks/bin/python \
+  artifact/framework_surface_probe_lock.txt
+make framework-probe-verify
 ```
 
-`artifact/framework_prevalence_lock.txt` records the complete environment used
-for the released result. Exact framework versions and source digests are also
-embedded in the result JSON.
+`artifact/framework_surface_probe_lock.txt` recreates the complete environment
+used for the released result. The smaller
+`artifact/framework_surface_probe_requirements.txt` is a direct-dependency list
+for fresh-resolution compatibility checks, not exact replay. Exact framework
+versions and source digests are embedded in the result JSON. The replay target
+verifies the installed environment against the lock, executes the probe,
+requires a byte-identical result, and only then writes
+`artifact/results/framework_surface_probe_replay_receipt.json`.
 
 ## Repository Layout
 
@@ -95,13 +101,19 @@ candidate protocol in a deterministic harness. It does not claim:
 - a production streaming-runtime implementation;
 - proof about consciousness or personhood.
 
+The paper proposes response-level atomic admission for correlated or mutating
+calls. Per-call partial success can be a reasonable alternative for independent,
+idempotent, or read-only calls. The framework probe measures the difference; it
+does not decide that maintainers chose the wrong contract.
+
 Those limits are part of the result, not footnotes to it.
 
 ## Citation
 
 Use the tagged release as the citation unit. GitHub can read
 [`CITATION.cff`](CITATION.cff) directly. After the first public release is
-archived with Zenodo, the DOI can be added without changing the v0.1.0 record.
+archived with Zenodo, the DOI can be added without changing existing tagged
+release records.
 
 ## Rights and Attribution
 

@@ -1,11 +1,15 @@
 PYTHON ?= python
+FRAMEWORK_PYTHON ?= .venv-frameworks/bin/python
 
-.PHONY: all experiment figures paper manifest test verify
+.PHONY: all experiment framework-probe-verify figures paper manifest test verify
 
-all: experiment figures paper manifest test
+all: experiment framework-probe-verify figures paper manifest test
 
 experiment:
 	$(PYTHON) artifact/run_fault_injection.py
+
+framework-probe-verify:
+	$(PYTHON) scripts/build_framework_replay_receipt.py --python $(FRAMEWORK_PYTHON)
 
 figures:
 	$(PYTHON) scripts/generate_figures.py
@@ -19,4 +23,4 @@ manifest: paper
 test:
 	$(PYTHON) -m pytest -q
 
-verify: experiment figures paper manifest test
+verify: experiment framework-probe-verify figures paper manifest test

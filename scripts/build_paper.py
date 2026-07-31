@@ -225,7 +225,7 @@ def page_footer(canvas, doc) -> None:
     canvas.drawString(
         0.7 * inch,
         0.34 * inch,
-        "Andrew Gracey | Continuous Cognition, Failure-Atomic Actuation | v0.1.0",
+        "Andrew Gracey | Continuous Cognition, Failure-Atomic Actuation | v0.1.1",
     )
     canvas.drawRightString(width - 0.7 * inch, 0.34 * inch, f"Page {doc.page}")
     canvas.restoreState()

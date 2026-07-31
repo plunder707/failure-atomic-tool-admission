@@ -1,0 +1,180 @@
+{
+  "claim_boundary": "Five pinned executable paths and one separately interpreted typed core boundary. The probe reports observed behavior, not whether partial success is intended, defective, or exploitable. LlamaIndex provider adapters remain unresolved because the tested core event requires parsed dict arguments.",
+  "environment": {
+    "platform": "linux",
+    "python": "3.11.14"
+  },
+  "executable_paths_tested": 5,
+  "format": "tool_admission_framework_surface_probe/v2",
+  "harness_error_count": 0,
+  "injection": "valid_call_then_truncated_json_call",
+  "partial_admission_observed_count": 5,
+  "results": [
+    {
+      "api_status": "internal_method_of_public_component",
+      "call_1_executed": true,
+      "classification": "partial_admission_observed",
+      "framework": "LangChain/LangGraph",
+      "injection_boundary": "provider_normalized_AIMessage",
+      "malformed_state_observed": true,
+      "notes": [
+        "The provider-normalized AIMessage contained one valid tool_call and one invalid_tool_call.",
+        "ToolNode executed the valid list without rejecting the response-level invalid sibling.",
+        "The probe does not establish whether this separation is intended framework policy."
+      ],
+      "raw_malformed_representable": true,
+      "same_response_batch_visible": true,
+      "satisfies_proposed_batch_failure_atomicity": false,
+      "source_binding": {
+        "package_relative_path": "langgraph/prebuilt/tool_node.py",
+        "sha256": "af6df67779000d219b2e1799401238f3618511658b26316a70a5e432891040d3"
+      },
+      "state_location": "AIMessage.invalid_tool_calls",
+      "state_replay_authority": "message state only; the tested ToolNode path consumes tool_calls and ignores invalid_tool_calls",
+      "surface_kind": "executable_path",
+      "tested_surface": "langgraph.prebuilt.ToolNode._func",
+      "versions": {
+        "langchain": "1.3.14",
+        "langgraph": "1.2.10"
+      }
+    },
+    {
+      "api_status": "public_function",
+      "call_1_executed": true,
+      "classification": "partial_admission_observed",
+      "framework": "AutoGen",
+      "injection_boundary": "model_client_FunctionCall_list",
+      "malformed_state_observed": true,
+      "notes": [
+        "The caller loop appended the two-call AssistantMessage before dispatch.",
+        "asyncio.gather executed the valid call while the malformed call became a FunctionExecutionResult error.",
+        "Per-call partial success may be intentional error-isolation semantics."
+      ],
+      "raw_malformed_representable": true,
+      "same_response_batch_visible": true,
+      "satisfies_proposed_batch_failure_atomicity": false,
+      "source_binding": {
+        "package_relative_path": "autogen_core/tool_agent/_caller_loop.py",
+        "sha256": "7defe56c501103a280cc355755bf69298ec4f03353760e9c19c21e30d607002a"
+      },
+      "state_location": "generated AssistantMessage content",
+      "state_replay_authority": "session history used for the follow-up model call",
+      "surface_kind": "executable_path",
+      "tested_surface": "autogen_core.tool_agent.tool_agent_caller_loop",
+      "versions": {
+        "autogen-agentchat": "0.7.5",
+        "autogen-core": "0.7.5"
+      }
+    },
+    {
+      "api_status": "public_typed_event",
+      "call_1_executed": null,
+      "classification": "core_boundary_structural_rejection",
+      "framework": "LlamaIndex",
+      "injection_boundary": "ToolCall construction",
+      "malformed_state_observed": false,
+      "notes": [
+        "The core ToolCall event requires tool_kwargs to be a dictionary.",
+        "Provider adapters parse raw argument strings before this boundary; their batch-wide behavior is not established by this core-only probe.",
+        "This result is not part of the executable-path denominator."
+      ],
+      "raw_malformed_representable": false,
+      "same_response_batch_visible": false,
+      "satisfies_proposed_batch_failure_atomicity": null,
+      "source_binding": {
+        "package_relative_path": "llama_index/core/agent/workflow/workflow_events.py",
+        "sha256": "ab3dc74726705eec645d1ac3e3f72184cb6cdb5b96dfd53906e2383e3f571710"
+      },
+      "state_location": null,
+      "state_replay_authority": "not_applicable_at_tested_boundary",
+      "surface_kind": "typed_core_boundary",
+      "tested_surface": "llama_index.core.agent.workflow.ToolCall validation",
+      "versions": {
+        "llama-index-core": "0.14.23"
+      }
+    },
+    {
+      "api_status": "internal_runtime_path",
+      "call_1_executed": true,
+      "classification": "partial_admission_observed",
+      "framework": "OpenAI Agents SDK",
+      "injection_boundary": "ModelResponse.output",
+      "malformed_state_observed": true,
+      "notes": [
+        "Both calls became run items before execution.",
+        "Concurrent execution committed the valid call while malformed JSON became a handled tool error.",
+        "Per-call error handling may be intentional; this probe evaluates a stronger response-level contract."
+      ],
+      "raw_malformed_representable": true,
+      "same_response_batch_visible": true,
+      "satisfies_proposed_batch_failure_atomicity": false,
+      "source_binding": {
+        "package_relative_path": "agents/_run_impl.py",
+        "sha256": "d7c170c8ea58994ab3e89be361fef77cb588bf65e9e0cf4acc8e882736e1c370"
+      },
+      "state_location": "processed run items",
+      "state_replay_authority": "framework run state; replay authority not tested",
+      "surface_kind": "executable_path",
+      "tested_surface": "agents._run_impl.RunImpl.process_model_response + execute_function_tool_calls",
+      "versions": {
+        "openai": "2.51.0",
+        "openai-agents": "0.7.0"
+      }
+    },
+    {
+      "api_status": "deprecated_internal_method",
+      "call_1_executed": true,
+      "classification": "partial_admission_observed",
+      "framework": "CrewAI",
+      "injection_boundary": "native tool-call objects passed to internal handler",
+      "malformed_state_observed": true,
+      "notes": [
+        "The tested released path is deprecated but remains shipped in CrewAI 1.15.9.",
+        "It appended the complete raw batch, executed the valid call, and stored an error result for malformed JSON."
+      ],
+      "raw_malformed_representable": true,
+      "same_response_batch_visible": true,
+      "satisfies_proposed_batch_failure_atomicity": false,
+      "source_binding": {
+        "package_relative_path": "crewai/agents/crew_agent_executor.py",
+        "sha256": "f556232dfb1dcde5e0c1ea46863b17aa6cf5b0b3dd75bb18cc9211aac64130a5"
+      },
+      "state_location": "CrewAgentExecutor.messages assistant tool_calls",
+      "state_replay_authority": "internal message state; replay authority not tested",
+      "surface_kind": "executable_path",
+      "tested_surface": "crewai.agents.CrewAgentExecutor._handle_native_tool_calls",
+      "versions": {
+        "crewai": "1.15.9"
+      }
+    },
+    {
+      "api_status": "internal_method_of_public_component",
+      "call_1_executed": true,
+      "classification": "partial_admission_observed",
+      "framework": "smolagents",
+      "injection_boundary": "ChatMessage.tool_calls returned by model stub",
+      "malformed_state_observed": true,
+      "notes": [
+        "The valid call committed before the malformed sibling raised AgentToolExecutionError.",
+        "The raw model output was assigned to the ActionStep before argument parsing and execution."
+      ],
+      "raw_malformed_representable": true,
+      "same_response_batch_visible": true,
+      "satisfies_proposed_batch_failure_atomicity": false,
+      "source_binding": {
+        "package_relative_path": "smolagents/agents.py",
+        "sha256": "da0da2e258c346e28d97b3584dfe58dcd203fc20fbde6c6533e333f9b1a06352"
+      },
+      "state_location": "ActionStep.model_output_message",
+      "state_replay_authority": "ActionStep state; replay authority not tested",
+      "surface_kind": "executable_path",
+      "tested_surface": "smolagents.ToolCallingAgent._step_stream",
+      "versions": {
+        "smolagents": "1.26.0"
+      }
+    }
+  ],
+  "surfaces_total": 6,
+  "typed_core_boundaries_tested": 1,
+  "typed_core_structural_rejection_count": 1
+}

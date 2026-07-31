@@ -1,0 +1,22 @@
+name: framework-surface-probe
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v6
+      - run: uv venv --python 3.11 .venv-frameworks
+      - run: uv pip sync --python .venv-frameworks/bin/python artifact/framework_surface_probe_lock.txt
+      - run: python scripts/build_framework_replay_receipt.py --python .venv-frameworks/bin/python --output /tmp/framework_surface_probe_replay_receipt.json
+      - run: cmp artifact/results/framework_surface_probe_replay_receipt.json /tmp/framework_surface_probe_replay_receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: framework-surface-probe-replay-receipt
+          path: /tmp/framework_surface_probe_replay_receipt.json

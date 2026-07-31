@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Probe failure-atomic tool admission in pinned agent frameworks.
+"""Probe tool-batch admission behavior on pinned framework surfaces.
 
 Each adapter uses the framework's released execution surface with fake local
 effects and no network model call. The injected response contains one valid
-call followed by one structurally malformed call. Results distinguish a
-vulnerable partial admission from a malformed state that cannot be represented
-at the tested core boundary.
+call followed by one structurally malformed call when that input is
+representable. Results report observed behavior without deciding whether a
+framework's per-call error semantics are intentional or defective.
 """
 
 from __future__ import annotations
@@ -48,10 +48,18 @@ def _result(
     framework: str,
     versions: dict[str, str],
     classification: str,
-    call_1_executed: bool,
-    malformed_in_history: bool | None,
+    call_1_executed: bool | None,
+    malformed_state_observed: bool | None,
     source: dict[str, Any],
     tested_surface: str,
+    surface_kind: str,
+    api_status: str,
+    injection_boundary: str,
+    raw_malformed_representable: bool,
+    same_response_batch_visible: bool,
+    state_location: str | None,
+    state_replay_authority: str,
+    satisfies_proposed_batch_failure_atomicity: bool | None,
     notes: list[str],
 ) -> dict[str, Any]:
     return {
@@ -59,8 +67,18 @@ def _result(
         "versions": versions,
         "classification": classification,
         "call_1_executed": call_1_executed,
-        "malformed_in_history": malformed_in_history,
+        "malformed_state_observed": malformed_state_observed,
         "tested_surface": tested_surface,
+        "surface_kind": surface_kind,
+        "api_status": api_status,
+        "injection_boundary": injection_boundary,
+        "raw_malformed_representable": raw_malformed_representable,
+        "same_response_batch_visible": same_response_batch_visible,
+        "state_location": state_location,
+        "state_replay_authority": state_replay_authority,
+        "satisfies_proposed_batch_failure_atomicity": (
+            satisfies_proposed_batch_failure_atomicity
+        ),
         "source_binding": source,
         "notes": notes,
     }
@@ -104,14 +122,26 @@ def probe_langchain_langgraph() -> dict[str, Any]:
             "langchain": _version("langchain"),
             "langgraph": _version("langgraph"),
         },
-        classification="vulnerable_partial_admission",
+        classification="partial_admission_observed",
         call_1_executed=effects == [("a", "A")],
-        malformed_in_history=bool(message.invalid_tool_calls),
+        malformed_state_observed=bool(message.invalid_tool_calls),
         source=_source_binding(ToolNode._func),
         tested_surface="langgraph.prebuilt.ToolNode._func",
+        surface_kind="executable_path",
+        api_status="internal_method_of_public_component",
+        injection_boundary="provider_normalized_AIMessage",
+        raw_malformed_representable=True,
+        same_response_batch_visible=True,
+        state_location="AIMessage.invalid_tool_calls",
+        state_replay_authority=(
+            "message state only; the tested ToolNode path consumes tool_calls "
+            "and ignores invalid_tool_calls"
+        ),
+        satisfies_proposed_batch_failure_atomicity=False,
         notes=[
             "The provider-normalized AIMessage contained one valid tool_call and one invalid_tool_call.",
             "ToolNode executed the valid list without rejecting the response-level invalid sibling.",
+            "The probe does not establish whether this separation is intended framework policy.",
         ],
     )
 
@@ -173,7 +203,7 @@ def probe_autogen() -> dict[str, Any]:
         [UserMessage(content="go", source="user")],
         [tool],
     ))
-    malformed_in_history = (
+    malformed_state_observed = (
         len(generated) >= 1
         and isinstance(generated[0].content, list)
         and any(call.id == "bad" for call in generated[0].content)
@@ -184,14 +214,23 @@ def probe_autogen() -> dict[str, Any]:
             "autogen-agentchat": _version("autogen-agentchat"),
             "autogen-core": _version("autogen-core"),
         },
-        classification="vulnerable_partial_admission",
+        classification="partial_admission_observed",
         call_1_executed=effects == [("a", "A")],
-        malformed_in_history=malformed_in_history,
+        malformed_state_observed=malformed_state_observed,
         source=_source_binding(tool_agent_caller_loop),
         tested_surface="autogen_core.tool_agent.tool_agent_caller_loop",
+        surface_kind="executable_path",
+        api_status="public_function",
+        injection_boundary="model_client_FunctionCall_list",
+        raw_malformed_representable=True,
+        same_response_batch_visible=True,
+        state_location="generated AssistantMessage content",
+        state_replay_authority="session history used for the follow-up model call",
+        satisfies_proposed_batch_failure_atomicity=False,
         notes=[
             "The caller loop appended the two-call AssistantMessage before dispatch.",
             "asyncio.gather executed the valid call while the malformed call became a FunctionExecutionResult error.",
+            "Per-call partial success may be intentional error-isolation semantics.",
         ],
     )
 
@@ -220,13 +259,22 @@ def probe_llamaindex() -> dict[str, Any]:
             if rejected
             else "harness_unexpected_representation"
         ),
-        call_1_executed=bool(effects),
-        malformed_in_history=False if rejected else None,
+        call_1_executed=None,
+        malformed_state_observed=False if rejected else None,
         source=_source_binding(ToolCall),
         tested_surface="llama_index.core.agent.workflow.ToolCall validation",
+        surface_kind="typed_core_boundary",
+        api_status="public_typed_event",
+        injection_boundary="ToolCall construction",
+        raw_malformed_representable=False,
+        same_response_batch_visible=False,
+        state_location=None,
+        state_replay_authority="not_applicable_at_tested_boundary",
+        satisfies_proposed_batch_failure_atomicity=None,
         notes=[
             "The core ToolCall event requires tool_kwargs to be a dictionary.",
             "Provider adapters parse raw argument strings before this boundary; their batch-wide behavior is not established by this core-only probe.",
+            "This result is not part of the executable-path denominator.",
         ],
     )
 
@@ -290,9 +338,9 @@ def probe_openai_agents() -> dict[str, Any]:
             "openai-agents": _version("openai-agents"),
             "openai": _version("openai"),
         },
-        classification="vulnerable_partial_admission",
+        classification="partial_admission_observed",
         call_1_executed=effects == [("a", "A")],
-        malformed_in_history=any(
+        malformed_state_observed=any(
             getattr(item.raw_item, "call_id", None) == "bad"
             for item in processed.new_items
         ),
@@ -301,9 +349,18 @@ def probe_openai_agents() -> dict[str, Any]:
             "agents._run_impl.RunImpl.process_model_response + "
             "execute_function_tool_calls"
         ),
+        surface_kind="executable_path",
+        api_status="internal_runtime_path",
+        injection_boundary="ModelResponse.output",
+        raw_malformed_representable=True,
+        same_response_batch_visible=True,
+        state_location="processed run items",
+        state_replay_authority="framework run state; replay authority not tested",
+        satisfies_proposed_batch_failure_atomicity=False,
         notes=[
             "Both calls became run items before execution.",
             "Concurrent execution committed the valid call while malformed JSON became a handled tool error.",
+            "Per-call error handling may be intentional; this probe evaluates a stronger response-level contract.",
         ],
     )
 
@@ -341,7 +398,7 @@ def probe_crewai() -> dict[str, Any]:
         ),
     ]
     executor._handle_native_tool_calls(calls, {"write_a": write_a.run})
-    malformed_in_history = any(
+    malformed_state_observed = any(
         message.get("role") == "assistant"
         and any(
             call.get("id") == "bad"
@@ -352,11 +409,19 @@ def probe_crewai() -> dict[str, Any]:
     return _result(
         framework="CrewAI",
         versions={"crewai": _version("crewai")},
-        classification="vulnerable_partial_admission",
+        classification="partial_admission_observed",
         call_1_executed=effects == [("a", "A")],
-        malformed_in_history=malformed_in_history,
+        malformed_state_observed=malformed_state_observed,
         source=_source_binding(CrewAgentExecutor._handle_native_tool_calls),
         tested_surface="crewai.agents.CrewAgentExecutor._handle_native_tool_calls",
+        surface_kind="executable_path",
+        api_status="deprecated_internal_method",
+        injection_boundary="native tool-call objects passed to internal handler",
+        raw_malformed_representable=True,
+        same_response_batch_visible=True,
+        state_location="CrewAgentExecutor.messages assistant tool_calls",
+        state_replay_authority="internal message state; replay authority not tested",
+        satisfies_proposed_batch_failure_atomicity=False,
         notes=[
             "The tested released path is deprecated but remains shipped in CrewAI 1.15.9.",
             "It appended the complete raw batch, executed the valid call, and stored an error result for malformed JSON.",
@@ -393,7 +458,7 @@ def probe_smolagents() -> dict[str, Any]:
 
     class ModelStub(Model):
         def __init__(self, message: ChatMessage) -> None:
-            super().__init__(model_id="prevalence-stub")
+            super().__init__(model_id="surface-probe-stub")
             self.message = message
 
         def generate(self, *args: Any, **kwargs: Any) -> ChatMessage:
@@ -437,7 +502,7 @@ def probe_smolagents() -> dict[str, Any]:
         list(agent._step_stream(step))
     except Exception as exc:
         error_type = type(exc).__name__
-    malformed_in_history = bool(
+    malformed_state_observed = bool(
         step.model_output_message
         and step.model_output_message.tool_calls
         and any(call.id == "bad" for call in step.model_output_message.tool_calls)
@@ -445,11 +510,19 @@ def probe_smolagents() -> dict[str, Any]:
     return _result(
         framework="smolagents",
         versions={"smolagents": _version("smolagents")},
-        classification="vulnerable_partial_admission",
+        classification="partial_admission_observed",
         call_1_executed=effects == [("a", "A")],
-        malformed_in_history=malformed_in_history,
+        malformed_state_observed=malformed_state_observed,
         source=_source_binding(ToolCallingAgent._step_stream),
         tested_surface="smolagents.ToolCallingAgent._step_stream",
+        surface_kind="executable_path",
+        api_status="internal_method_of_public_component",
+        injection_boundary="ChatMessage.tool_calls returned by model stub",
+        raw_malformed_representable=True,
+        same_response_batch_visible=True,
+        state_location="ActionStep.model_output_message",
+        state_replay_authority="ActionStep state; replay authority not tested",
+        satisfies_proposed_batch_failure_atomicity=False,
         notes=[
             f"The valid call committed before the malformed sibling raised {error_type}.",
             "The raw model output was assigned to the ActionStep before argument parsing and execution.",
@@ -477,25 +550,37 @@ def run() -> dict[str, Any]:
                 "framework": probe.__name__.removeprefix("probe_"),
                 "classification": "harness_error",
                 "call_1_executed": None,
-                "malformed_in_history": None,
+                "malformed_state_observed": None,
+                "surface_kind": "unknown",
+                "satisfies_proposed_batch_failure_atomicity": None,
                 "error": f"{type(exc).__name__}: {exc}",
             })
-    vulnerable = [
+    executable_paths = [
         result
         for result in results
-        if result["classification"] == "vulnerable_partial_admission"
-        and result["call_1_executed"]
+        if result.get("surface_kind") == "executable_path"
+    ]
+    partial_admission = [
+        result
+        for result in executable_paths
+        if result["classification"] == "partial_admission_observed"
+        and result["call_1_executed"] is True
     ]
     return {
-        "format": "tool_admission_framework_prevalence/v1",
+        "format": "tool_admission_framework_surface_probe/v2",
         "environment": {
             "python": sys.version.split()[0],
             "platform": sys.platform,
         },
         "injection": "valid_call_then_truncated_json_call",
-        "framework_surfaces": len(results),
-        "vulnerable_partial_admission_count": len(vulnerable),
-        "structural_rejection_count": sum(
+        "surfaces_total": len(results),
+        "executable_paths_tested": len(executable_paths),
+        "partial_admission_observed_count": len(partial_admission),
+        "typed_core_boundaries_tested": sum(
+            result.get("surface_kind") == "typed_core_boundary"
+            for result in results
+        ),
+        "typed_core_structural_rejection_count": sum(
             result["classification"] == "core_boundary_structural_rejection"
             for result in results
         ),
@@ -504,8 +589,11 @@ def run() -> dict[str, Any]:
             for result in results
         ),
         "claim_boundary": (
-            "Pinned released Python surfaces only. LlamaIndex provider adapters "
-            "remain unresolved because the tested core event requires parsed dict arguments."
+            "Five pinned executable paths and one separately interpreted typed "
+            "core boundary. The probe reports observed behavior, not whether "
+            "partial success is intended, defective, or exploitable. LlamaIndex "
+            "provider adapters remain unresolved because the tested core event "
+            "requires parsed dict arguments."
         ),
         "results": results,
     }
@@ -519,7 +607,7 @@ def main() -> int:
         default=(
             Path(__file__).resolve().parent
             / "results"
-            / "framework_prevalence.json"
+            / "framework_surface_probe.json"
         ),
     )
     args = parser.parse_args()
@@ -532,9 +620,11 @@ def main() -> int:
     print(json.dumps({
         key: payload[key]
         for key in (
-            "framework_surfaces",
-            "vulnerable_partial_admission_count",
-            "structural_rejection_count",
+            "surfaces_total",
+            "executable_paths_tested",
+            "partial_admission_observed_count",
+            "typed_core_boundaries_tested",
+            "typed_core_structural_rejection_count",
             "harness_error_count",
         )
     }, indent=2, sort_keys=True))

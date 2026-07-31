@@ -1,0 +1,53 @@
+{
+  "bindings": {
+    "probe": {
+      "bytes": 22475,
+      "path": "artifact/run_framework_surface_probe.py",
+      "sha256": "69ecad1c60b029a11a123dc2fe02685730ff1fa4294408352bd35399f32933d7"
+    },
+    "requirements": {
+      "bytes": 177,
+      "path": "artifact/framework_surface_probe_requirements.txt",
+      "sha256": "db99b8f5aa6dec03894c4468813d1c40ad24dac46a2799b8b2f53f2153bd6cb9"
+    },
+    "resolved_environment": {
+      "bytes": 3446,
+      "path": "artifact/framework_surface_probe_lock.txt",
+      "sha256": "01e09ce34661621013211b1adb20b52399b31f2d85a6354a913cca1134dbf574"
+    }
+  },
+  "environment": {
+    "install_command": "uv pip sync --python .venv-frameworks/bin/python artifact/framework_surface_probe_lock.txt",
+    "interpreter_label": ".venv-frameworks/bin/python",
+    "platform": "linux",
+    "python": "3.11.14",
+    "replay_command": "make framework-probe-verify FRAMEWORK_PYTHON=.venv-frameworks/bin/python"
+  },
+  "format": "framework_surface_probe_replay_receipt/v2",
+  "release": "0.1.1",
+  "replay_date": "2026-07-30",
+  "summary": {
+    "executable_paths_tested": 5,
+    "harness_error_count": 0,
+    "partial_admission_observed_count": 5,
+    "surfaces_total": 6,
+    "typed_core_boundaries_tested": 1,
+    "typed_core_structural_rejection_count": 1
+  },
+  "verification": {
+    "candidate_output": {
+      "bytes": 8210,
+      "ephemeral": true,
+      "sha256": "12f7f7c6fe1d1af90f162c3460b01514d5b1d70c9eeebfa6ac80429f5c312cb9"
+    },
+    "environment_lock_match": true,
+    "mode": "subprocess_replay_then_byte_compare",
+    "probe_exit_status": 0,
+    "reference_output": {
+      "bytes": 8210,
+      "path": "artifact/results/framework_surface_probe.json",
+      "sha256": "12f7f7c6fe1d1af90f162c3460b01514d5b1d70c9eeebfa6ac80429f5c312cb9"
+    },
+    "result_byte_match": true
+  }
+}

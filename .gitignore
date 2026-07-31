@@ -3,7 +3,8 @@ __pycache__/
 .pytest_cache/
 .coverage
 .venv/
-.venv-frameworks/
+.venv-frameworks
+.venv-frameworks-v011/
 build/
 dist/
 *.egg-info/

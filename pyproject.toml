@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "failure-atomic-tool-admission"
-version = "0.1.0"
+version = "0.1.1"
 description = "Reproducible research artifact for failure-atomic tool-call admission"
 readme = "README.md"
 requires-python = ">=3.10"

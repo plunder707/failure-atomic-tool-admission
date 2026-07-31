@@ -25,7 +25,7 @@ GREEN = "#2E7D5B"
 PALE_GREEN = "#E8F3ED"
 GRAY = "#5D6872"
 LIGHT = "#F4F6F7"
-matplotlib.rcParams["svg.hashsalt"] = "failure-atomic-tool-admission-v0.1.0"
+matplotlib.rcParams["svg.hashsalt"] = "failure-atomic-tool-admission-v0.1.1"
 
 
 def save_all(fig: plt.Figure, name: str) -> None:
@@ -38,12 +38,12 @@ def save_all(fig: plt.Figure, name: str) -> None:
             metadata = {
                 "Title": name.replace("_", " ").title(),
                 "Author": "Andrew Gracey",
-                "Creator": "failure-atomic-tool-admission v0.1.0",
+                "Creator": "failure-atomic-tool-admission v0.1.1",
                 "CreationDate": fixed,
                 "ModDate": fixed,
             }
         else:
-            metadata = {"Software": "failure-atomic-tool-admission v0.1.0"}
+            metadata = {"Software": "failure-atomic-tool-admission v0.1.1"}
         output = FIGURES / f"{name}.{suffix}"
         fig.savefig(
             output,
@@ -283,20 +283,23 @@ def fault_matrix() -> None:
     save_all(fig, "fault_matrix")
 
 
-def framework_prevalence() -> None:
-    data = json.loads((ROOT / "artifact/results/framework_prevalence.json").read_text())
-    rows = data["results"]
+def framework_surface_probe() -> None:
+    data = json.loads((ROOT / "artifact/results/framework_surface_probe.json").read_text())
+    rows = [
+        row for row in data["results"]
+        if row["surface_kind"] == "executable_path"
+    ]
     names = [row["framework"] for row in rows]
     calls = [int(bool(row["call_1_executed"])) for row in rows]
-    history = [int(bool(row["malformed_in_history"])) for row in rows]
+    malformed_state = [int(bool(row["malformed_state_observed"])) for row in rows]
     y = list(range(len(rows)))
     fig, ax = plt.subplots(figsize=(10.5, 6.2))
     ax.scatter(calls, y, s=180, color=[RED if value else GREEN for value in calls], marker="s")
     ax.scatter(
-        history,
+        malformed_state,
         [value + 0.18 for value in y],
         s=130,
-        color=[RED if value else GREEN for value in history],
+        color=[RED if value else GREEN for value in malformed_state],
         marker="o",
     )
     ax.set_yticks(y, names)
@@ -304,7 +307,7 @@ def framework_prevalence() -> None:
     ax.set_xlim(-0.35, 1.35)
     ax.invert_yaxis()
     ax.set_title(
-        "Five of six pinned framework surfaces partially admitted the mixed batch",
+        "All five tested executable paths partially admitted the mixed batch",
         loc="left",
         fontsize=14.5,
         fontweight="bold",
@@ -316,12 +319,12 @@ def framework_prevalence() -> None:
     for index, row in enumerate(rows):
         label = (
             "partial admission"
-            if row["classification"] == "vulnerable_partial_admission"
-            else "typed core rejection"
+            if row["classification"] == "partial_admission_observed"
+            else row["classification"].replace("_", " ")
         )
         ax.text(1.08, index + 0.09, label, va="center", fontsize=9, color=GRAY)
     ax.scatter([], [], s=180, color=NAVY, marker="s", label="Valid call executed")
-    ax.scatter([], [], s=130, color=NAVY, marker="o", label="Malformed state retained")
+    ax.scatter([], [], s=130, color=NAVY, marker="o", label="Malformed state observed")
     ax.legend(
         frameon=False,
         loc="upper center",
@@ -331,13 +334,13 @@ def framework_prevalence() -> None:
     ax.text(
         0,
         -0.21,
-        "Convenience sample of released Python surfaces; not a population estimate.",
+        "Separate result: the tested LlamaIndex typed core boundary rejected raw malformed arguments.",
         transform=ax.transAxes,
         fontsize=9,
         color=GRAY,
     )
     fig.subplots_adjust(left=0.22, right=0.82, bottom=0.28)
-    save_all(fig, "framework_prevalence")
+    save_all(fig, "framework_surface_probe")
 
 
 def social_preview() -> None:
@@ -389,7 +392,7 @@ def social_preview() -> None:
         (7.92, 1.15),
         3.85,
         1.1,
-        "5 / 6 framework surfaces\npartially admitted the batch",
+        "5 executable paths\npartial admission observed",
         facecolor=PALE_BLUE,
         edgecolor=BLUE,
         textcolor=BLUE,
@@ -401,7 +404,7 @@ def social_preview() -> None:
         FIGURES / "social_preview.png",
         dpi=100,
         facecolor="white",
-        metadata={"Software": "failure-atomic-tool-admission v0.1.0"},
+        metadata={"Software": "failure-atomic-tool-admission v0.1.1"},
     )
     plt.close(fig)
 
@@ -410,7 +413,7 @@ def main() -> None:
     admission_boundary()
     protocol_state_machine()
     fault_matrix()
-    framework_prevalence()
+    framework_surface_probe()
     social_preview()
     print(f"wrote publication figures to {FIGURES}")
 
