@@ -99,7 +99,6 @@ candidate protocol in a deterministic harness. It does not claim:
 - population prevalence across all agent frameworks;
 - end-to-end improvement in model task quality;
 - a production streaming-runtime implementation;
-- proof about consciousness or personhood.
 
 The paper proposes response-level atomic admission for correlated or mutating
 calls. Per-call partial success can be a reasonable alternative for independent,
@@ -107,13 +106,6 @@ idempotent, or read-only calls. The framework probe measures the difference; it
 does not decide that maintainers chose the wrong contract.
 
 Those limits are part of the result, not footnotes to it.
-
-## Citation
-
-Use the tagged release as the citation unit. GitHub can read
-[`CITATION.cff`](CITATION.cff) directly. After the first public release is
-archived with Zenodo, the DOI can be added without changing existing tagged
-release records.
 
 ## Rights and Attribution
 
