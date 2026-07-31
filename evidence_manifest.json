@@ -1,0 +1,106 @@
+{
+  "files": [
+    {
+      "bytes": 209880,
+      "path": "artifact/results/fault_injection.json",
+      "sha256": "f05e18536e942fa70325b401b408fff08ee2b81db596920df9e1e75ac9e3f377"
+    },
+    {
+      "bytes": 4944,
+      "path": "artifact/results/framework_prevalence.json",
+      "sha256": "3dfc709774d9c00724555fb6aabd300e3b001455c2fe1915e9baa09b5865f223"
+    },
+    {
+      "bytes": 1427,
+      "path": "evidence/incident_summary.md",
+      "sha256": "9f1bfd90b0012ef644016608c474d9e6dea79330ad9a3149d6a17a93e0a447c7"
+    },
+    {
+      "bytes": 827,
+      "path": "evidence/reference_runtime_ordering.py",
+      "sha256": "216378ac7de62b394764bcf66b73b19f83a74a406f2eaeef7e3ff967eddd02c0"
+    },
+    {
+      "bytes": 23856,
+      "path": "figures/admission_boundary.pdf",
+      "sha256": "4b0c9abc82662721264adaec9a64ce4b8a77f22e2155b4553a8361fd672c27b7"
+    },
+    {
+      "bytes": 150677,
+      "path": "figures/admission_boundary.png",
+      "sha256": "22e31ba232e67313af1e74b0cbefe1cc0d4f156bd91d96a47527cfb6f83ad2b7"
+    },
+    {
+      "bytes": 57418,
+      "path": "figures/admission_boundary.svg",
+      "sha256": "6fa70b8a75d73f77d343ec532bbabc5f71b34f1e2b48bf1c7fb6fabdb4d5057e"
+    },
+    {
+      "bytes": 23450,
+      "path": "figures/fault_matrix.pdf",
+      "sha256": "56d339fdf01ca285bc9281e1cb6eeef7899f779144d7c976b50f5669ee6a2769"
+    },
+    {
+      "bytes": 100568,
+      "path": "figures/fault_matrix.png",
+      "sha256": "7f4af3524284e553cee95dda5eabc3986b56176adfa6243e1f05d62f21a91a6c"
+    },
+    {
+      "bytes": 46996,
+      "path": "figures/fault_matrix.svg",
+      "sha256": "cfdfb65d6fbf80a9096f1b09845a4681af26571df7edef794b9febcca3145684"
+    },
+    {
+      "bytes": 23745,
+      "path": "figures/framework_prevalence.pdf",
+      "sha256": "7304d18669240cbfd413f31b27a2e8646571abd7140efc3fb680739693a0efb4"
+    },
+    {
+      "bytes": 138039,
+      "path": "figures/framework_prevalence.png",
+      "sha256": "a2ed099c8bca1809c05d3edafdae00525d523c8d12cf73ee8b443ae4c126502d"
+    },
+    {
+      "bytes": 51679,
+      "path": "figures/framework_prevalence.svg",
+      "sha256": "aa3c050cb8c8cfadc9e43f30fc5c9d9917644d8fe40da3071bdbe308b11317f4"
+    },
+    {
+      "bytes": 18784,
+      "path": "figures/protocol_state_machine.pdf",
+      "sha256": "e33a42daa9ddf8cab73e7d1aaf7e724e98666890107324e7b5bdca92cda59027"
+    },
+    {
+      "bytes": 127933,
+      "path": "figures/protocol_state_machine.png",
+      "sha256": "904d7bdf2916fa1a9cf602ba6bda11e5a9988d685b7ac8b9be3563d1abafbfc0"
+    },
+    {
+      "bytes": 39285,
+      "path": "figures/protocol_state_machine.svg",
+      "sha256": "3b0bf8dd92d1c24419ce19acbd0b905daf29c3d80caefb011a45af56cd4c885e"
+    },
+    {
+      "bytes": 51740,
+      "path": "figures/social_preview.png",
+      "sha256": "9d735b6b54fd8b4f0524d9128c34dc8124b12b5ac329958d1f537e3035d3f756"
+    },
+    {
+      "bytes": 25631,
+      "path": "paper/paper.md",
+      "sha256": "5536855b7870e4bfd6c50bb0262d9244623923f2e81999b9fa9e644306748d64"
+    },
+    {
+      "bytes": 504655,
+      "path": "paper/paper.pdf",
+      "sha256": "18072fc6d946683e15d02f5d09b6941caf26ff8cfa25c07c44e09448aee8763a"
+    },
+    {
+      "bytes": 2694,
+      "path": "paper/references.bib",
+      "sha256": "fed1cf4faf035a0bb8351dc5c1f04cbd360786d298f2734fe0d2552de5014122"
+    }
+  ],
+  "format": "failure_atomic_tool_admission_manifest/v1",
+  "version": "0.1.0"
+}

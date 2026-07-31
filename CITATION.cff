@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this work, cite the tagged release and accompanying manuscript."
+title: "Continuous Cognition, Failure-Atomic Actuation"
+type: software
+version: 0.1.0
+date-released: 2026-07-30
+authors:
+  - family-names: Gracey
+    given-names: Andrew
+repository-code: "https://github.com/plunder707/failure-atomic-tool-admission"
+url: "https://github.com/plunder707/failure-atomic-tool-admission"
+license: Apache-2.0
+preferred-citation:
+  type: article
+  title: "Continuous Cognition, Failure-Atomic Actuation: A Protocol for Recovering Malformed Tool Calls Without Corrupting Stateful Agent Execution"
+  authors:
+    - family-names: Gracey
+      given-names: Andrew
+  year: 2026
+  url: "https://github.com/plunder707/failure-atomic-tool-admission"
