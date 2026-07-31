@@ -1,6 +1,6 @@
 # Continuous Cognition, Failure-Atomic Actuation
 
-[![Release](https://img.shields.io/badge/release-v0.1.1-2E7D5B)](RELEASE_NOTES.md)
+[![Release](https://img.shields.io/badge/release-v0.1.2-2E7D5B)](RELEASE_NOTES.md)
 [![Code license](https://img.shields.io/badge/code-Apache--2.0-2C6E9F)](LICENSE)
 [![Paper license](https://img.shields.io/badge/paper-CC%20BY%204.0-B94343)](LICENSES/CC-BY-4.0.txt)
 
@@ -66,7 +66,7 @@ python scripts/build_manifest.py
 The framework probe has a larger isolated dependency set:
 
 ```bash
-uv venv --python 3.11 .venv-frameworks
+uv venv --python 3.11.14 .venv-frameworks
 uv pip sync --python .venv-frameworks/bin/python \
   artifact/framework_surface_probe_lock.txt
 make framework-probe-verify

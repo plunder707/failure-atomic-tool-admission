@@ -6,7 +6,7 @@
 Independent Researcher
 GitHub: [plunder707](https://github.com/plunder707)
 
-**Public artifact version 0.1.1, 2026-07-30**
+**Public artifact version 0.1.2, 2026-07-30**
 
 ## Abstract
 

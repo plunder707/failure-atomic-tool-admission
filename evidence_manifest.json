@@ -13,7 +13,7 @@
     {
       "bytes": 1830,
       "path": "artifact/results/framework_surface_probe_replay_receipt.json",
-      "sha256": "7e7e2ad34162cf6634d36f58ddb8f514ddfea40672fc792c2472668b42e9b396"
+      "sha256": "dff612219def0dc8cb7c5c80429470441bda8c33976519b13f3f6ff4dd97a236"
     },
     {
       "bytes": 1427,
@@ -28,77 +28,77 @@
     {
       "bytes": 23856,
       "path": "figures/admission_boundary.pdf",
-      "sha256": "2778314ace8864180480b0c01b856309dbc4070537da6fe32496a2737d697be2"
+      "sha256": "c312d632a59ae8a273bcd22ab12f9179bebcf8003d348d051502f6764bb5ca05"
     },
     {
       "bytes": 150677,
       "path": "figures/admission_boundary.png",
-      "sha256": "737b89b24bc8c3f05287fe49ab1046d9e5fee4cd8f9956205407c4ccb48ed0ef"
+      "sha256": "ffbf1c6ac5711836a47e69c472277bff3c3db20eda335f09ecbee2e5934bed5f"
     },
     {
       "bytes": 57418,
       "path": "figures/admission_boundary.svg",
-      "sha256": "675b2987083d1efd09302e4c84b8951e6b9b3ea809b1467a29a3af130f8304e1"
+      "sha256": "170dd85dc89ec91a1259d07cceb26b601ca2ec4417c034f81e6f5599ef384ce8"
     },
     {
       "bytes": 23450,
       "path": "figures/fault_matrix.pdf",
-      "sha256": "3c4972b08a5f62304dc9cfdfaf4a424ab5e15fe4c188bdbb9ac0d326b8bcd6b0"
+      "sha256": "427d212c69d788da7dc09fd41e17b22cb63c38853f1590f55b8f6912b17a7a44"
     },
     {
       "bytes": 100568,
       "path": "figures/fault_matrix.png",
-      "sha256": "aa5b5107cbab7e051e893304def10590f12658b30a3df114ec509388364a1be5"
+      "sha256": "3c557ed113eda4545cb44f37fc396cdbd8d75b6eee29e04600341081f15866d0"
     },
     {
       "bytes": 46996,
       "path": "figures/fault_matrix.svg",
-      "sha256": "5c255d3b9d99e113a7417551621b6a020ee1846f73004cbffcff2d023d761e71"
+      "sha256": "357b4f7d6f328be6fd0e80e0b19d581b745fc3609d8ce0f27efa30998074d5ad"
     },
     {
       "bytes": 22708,
       "path": "figures/framework_surface_probe.pdf",
-      "sha256": "245d8ff9b6a4966831f6f1a900060bff2790401e2dd5b68c94ad2c49556ebe18"
+      "sha256": "c218941648ea76ae2108eb738e039cd37a2ae93d3400ed5fe7a672a5a7e28e92"
     },
     {
       "bytes": 128779,
       "path": "figures/framework_surface_probe.png",
-      "sha256": "f41c8c81cbdd3a3c520f413a607b67d12fbf94ec58d3ac1b4dc29f28a91baf89"
+      "sha256": "7c762fefd4b8cd685b1cb44074d1c32533b06a4e229ff8d52b4756a485c138d9"
     },
     {
       "bytes": 48928,
       "path": "figures/framework_surface_probe.svg",
-      "sha256": "514fe441631947426a12a609b21d8e10bea0ffd0b94ebc187de62a4d4a76c303"
+      "sha256": "64f4f2d0e4894d38e10e600472c31851e1b472bb576d6384a8e2d032c2bb1a85"
     },
     {
       "bytes": 18784,
       "path": "figures/protocol_state_machine.pdf",
-      "sha256": "046b65270442a933839c57b98389b749258c8091410e10244fb18ee0b3f27e69"
+      "sha256": "e48ed4b6f215328ed9363be2b152092cc1f446cf02522dde200be8c6f33766e1"
     },
     {
       "bytes": 127933,
       "path": "figures/protocol_state_machine.png",
-      "sha256": "0b3793ce6049b4e954f7a659ab2292ff04c529ab49bf62361123ead6d389ef20"
+      "sha256": "368466b02f7e3e07d5413a641939b78a2bbd477063c5334aa871ea51ce17fce8"
     },
     {
       "bytes": 39285,
       "path": "figures/protocol_state_machine.svg",
-      "sha256": "04d5339a8346c599c7b480152d323453ce556bab1cb934eb2a0bca339843378a"
+      "sha256": "140adc33f539f5ab36197cfae4042da4db558ad78bdf26ce0597abe5a8208053"
     },
     {
       "bytes": 51126,
       "path": "figures/social_preview.png",
-      "sha256": "24b5a5ec25e7113d97a050bfc78e8a957f1dd67a5507d2a07b4c2ff4fc22d3a0"
+      "sha256": "aa704e5307a9e05ef11413dcac7c35962f0787f0f959d979170d6fd92a0cc29c"
     },
     {
       "bytes": 29410,
       "path": "paper/paper.md",
-      "sha256": "4a71b6ffc3366710a7f60acff39676a5f154deb8ce5fc6c88274b3e7086e5e47"
+      "sha256": "3343fc805b923d8a1dcb49e379a8afa29edbc8de5687bce1aaaf8462187589e7"
     },
     {
-      "bytes": 498949,
+      "bytes": 498951,
       "path": "paper/paper.pdf",
-      "sha256": "1d701160ffcf66c648377d384dcbe957a64686c02dfeddb477f7dfd3f603cf88"
+      "sha256": "7a0a60c0a0a3c852e6d608ac20e39468376f1398698b2fe78bfff2e5af6ec974"
     },
     {
       "bytes": 2694,
@@ -107,5 +107,5 @@
     }
   ],
   "format": "failure_atomic_tool_admission_manifest/v1",
-  "version": "0.1.1"
+  "version": "0.1.2"
 }

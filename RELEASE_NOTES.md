@@ -1,8 +1,7 @@
-# Release v0.1.1
+# Release v0.1.2
 
-This release clarifies the scope of the framework-surface evidence in
-*Continuous Cognition, Failure-Atomic Actuation*. The deterministic core result
-is unchanged.
+This release pins Python 3.11.14 across local and GitHub framework replays. The
+deterministic results and scoped scientific claims are unchanged from v0.1.1.
 
 ## Primary Result
 
@@ -22,17 +21,17 @@ The probe reports exact source-bound behavior. It does not determine whether
 per-call partial success is intended, defective, or exploitable. Several tested
 paths are internal, and the CrewAI path is deprecated.
 
-## Changes From v0.1.0
+## Changes From v0.1.1
 
-- Replaced `vulnerable_partial_admission` with
-  `partial_admission_observed`.
-- Removed the non-comparable five-of-six prevalence framing.
-- Added injection-boundary, API-status, malformed-state-location, and
-  replay-authority metadata.
-- Added an explicit discussion of per-call independence as an alternative
-  execution contract.
-- Added a clean-environment replay receipt and byte-comparing CI workflow.
-- Regenerated the manuscript, figures, manifest, and citation metadata.
+- Pinned Python 3.11.14 in the exact replay instructions and GitHub workflow.
+- Preserved the environment lock, source bindings, and result bytes from
+  v0.1.1.
+- Regenerated versioned manuscript, figures, manifest, receipt, and citation
+  metadata.
+
+v0.1.1 remains the claim-correction release. It replaced vulnerability
+terminology, fixed the non-comparable denominator, documented alternative
+per-call semantics, and introduced the mechanically earned replay receipt.
 
 ## Evidence Boundary
 

@@ -142,7 +142,7 @@ def main() -> None:
     result = json.loads(reference_raw)
     payload = {
         "format": "framework_surface_probe_replay_receipt/v2",
-        "release": "0.1.1",
+        "release": "0.1.2",
         "replay_date": "2026-07-30",
         "verification": {
             "mode": "subprocess_replay_then_byte_compare",

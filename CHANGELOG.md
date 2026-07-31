@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - 2026-07-30
+
+- Pinned Python 3.11.14 for exact local and GitHub framework replays.
+- Kept the v0.1.1 behavior result and scientific claim boundary unchanged.
+- Regenerated versioned release artifacts and metadata.
+
 ## 0.1.1 - 2026-07-30
 
 - Preserved the deterministic 107-cut result while narrowing the ecosystem

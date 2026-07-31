@@ -63,7 +63,7 @@ def test_framework_replay_receipt_matches_release_files() -> None:
     receipt = load_json(
         "artifact/results/framework_surface_probe_replay_receipt.json"
     )
-    assert receipt["release"] == "0.1.1"
+    assert receipt["release"] == "0.1.2"
     assert receipt["format"] == "framework_surface_probe_replay_receipt/v2"
     verification = receipt["verification"]
     assert verification["mode"] == "subprocess_replay_then_byte_compare"
@@ -102,7 +102,7 @@ def test_manuscript_identity_and_claim_boundary() -> None:
     paper = (ROOT / "paper/paper.md").read_text(encoding="utf-8")
     normalized = " ".join(paper.split())
     assert "**Andrew Gracey**" in paper
-    assert "Public artifact version 0.1.1" in paper
+    assert "Public artifact version 0.1.2" in paper
     assert "not a population-frequency estimate" in normalized
     assert (
         "Per-call independence is a defensible alternative contract"
@@ -142,12 +142,12 @@ def test_license_mapping_and_citation() -> None:
     ).read_text(encoding="utf-8")
     citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
     assert "family-names: Gracey" in citation
-    assert "version: 0.1.1" in citation
+    assert "version: 0.1.2" in citation
 
 
 def test_evidence_manifest_matches_files() -> None:
     manifest = load_json("evidence_manifest.json")
-    assert manifest["version"] == "0.1.1"
+    assert manifest["version"] == "0.1.2"
     assert manifest["files"]
     for record in manifest["files"]:
         path = ROOT / record["path"]

@@ -10,9 +10,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.11.14"
       - uses: astral-sh/setup-uv@v6
-      - run: uv venv --python 3.11 .venv-frameworks
+      - run: uv venv --python 3.11.14 .venv-frameworks
       - run: uv pip sync --python .venv-frameworks/bin/python artifact/framework_surface_probe_lock.txt
       - run: python scripts/build_framework_replay_receipt.py --python .venv-frameworks/bin/python --output /tmp/framework_surface_probe_replay_receipt.json
       - run: cmp artifact/results/framework_surface_probe_replay_receipt.json /tmp/framework_surface_probe_replay_receipt.json
