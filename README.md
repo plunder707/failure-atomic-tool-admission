@@ -1,6 +1,6 @@
 # Continuous Cognition, Failure-Atomic Actuation
 
-[![Release](https://img.shields.io/badge/release-v0.2.0-2E7D5B)](RELEASE_NOTES.md)
+[![Release](https://img.shields.io/badge/release-v0.2.1-2E7D5B)](RELEASE_NOTES.md)
 [![Code license](https://img.shields.io/badge/code-Apache--2.0-2C6E9F)](LICENSE)
 [![Paper license](https://img.shields.io/badge/paper-CC%20BY%204.0-B94343)](LICENSES/CC-BY-4.0.txt)
 
@@ -17,8 +17,8 @@ figures for a narrow execution-safety invariant:
 Tool-using systems often parse and dispatch generated calls sequentially. If a
 response contains one valid call followed by malformed JSON, the first effect
 can commit before the second call fails. This work separates narrative content
-from action frames, rejects any turn whose stop reason indicates truncation,
-and validates the complete action batch before admitting any call to
+from action frames, requires a recognized terminal stop reason, and validates
+the complete action batch before admitting any call to
 executable history or dispatch.
 
 The stop reason is a separate gate from validation. Generation can stop at the
@@ -38,15 +38,24 @@ cut one.
 | Completed narrative retained after rejection | No | Yes |
 | Ambiguous execution reported as unknown | No | Yes |
 | Boundary truncation, two complete calls, length stop | 2 effects, reported complete | 0 effects, rejected |
+| Unknown finish reason, two complete calls | 2 effects, reported complete | 0 effects, rejected |
 
-The last row is the silent case. Both calls parse, the baseline executes them
-and records a completed turn, and nothing raises.
+The final two rows are silent cases. Both calls parse, the baseline executes
+them and records a completed turn, and nothing raises.
 
 A bounded probe observed partial admission on all five pinned executable paths
 tested. A separately tested LlamaIndex typed core boundary rejected raw
 malformed arguments; provider-adapter behavior remains unresolved. These are
 exact source-bound observations, not a claim that five frameworks are
 vulnerable and not an ecosystem-wide prevalence estimate.
+
+A production-bound canary now exercises the deployed streaming adapter and
+admission policy. A valid-prefix/malformed-sibling batch and a fully parseable
+`finish_reason=length` batch both produced zero fixture effects. A terminal
+two-call batch produced two fixture effects, and a separate live read-only
+request recorded one admitted and one dispatched call. The private application
+runtime is not distributed here; the public receipt binds its tested source
+snapshot by SHA-256 and states that limitation explicitly.
 
 ![Framework surface behavior](figures/framework_surface_probe.svg)
 
@@ -110,7 +119,7 @@ candidate protocol in a deterministic harness. It does not claim:
 - rollback of arbitrary external side effects;
 - population prevalence across all agent frameworks;
 - end-to-end improvement in model task quality;
-- a production streaming-runtime implementation;
+- exhaustive production streaming fault replay or long-horizon recovery quality;
 
 The paper proposes response-level atomic admission for correlated or mutating
 calls. Per-call partial success can be a reasonable alternative for independent,

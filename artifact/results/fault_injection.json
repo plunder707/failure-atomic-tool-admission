@@ -5177,8 +5177,8 @@
     "candidate_malformed_history_contamination_rate": 0.0,
     "candidate_partial_effect_rate_valid_then_malformed": 0.0,
     "candidate_unknown_execution_truthful_rate": 1.0,
-    "deterministic_case_count": 10,
-    "trial_count": 11
+    "deterministic_case_count": 11,
+    "trial_count": 12
   },
   "trials": [
     {
@@ -5590,12 +5590,60 @@
           "malformed_call_index": null,
           "malformed_payload_in_history": false,
           "preserved_content": false,
-          "recovery_message": "Generation stopped at the output limit, so the action batch may be incomplete. No operation was admitted. Reissue the intended operations as one complete batch.",
+          "recovery_message": "Generation did not end with a recognized terminal signal, so the action batch may be incomplete. No operation was admitted. Reissue the intended operations as one complete batch.",
           "state": "rejected",
           "unknown_calls": 0
         }
       },
       "case": "boundary_truncation_all_parse"
+    },
+    {
+      "baseline": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "write_file:{\"content\": \"B\", \"path\": \"b\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "7770020cdc23e9c0e2f37daad7cedeef4458bc81377a5a62a3be21c9707618d6",
+          "batch_width": 2,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "7770020cdc23e9c0e2f37daad7cedeef4458bc81377a5a62a3be21c9707618d6",
+          "batch_width": 2,
+          "committed_calls": 0,
+          "error_kind": "NonterminalTurn",
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "Generation did not end with a recognized terminal signal, so the action batch may be incomplete. No operation was admitted. Reissue the intended operations as one complete batch.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      },
+      "case": "unknown_finish_all_parse"
     },
     {
       "baseline": {

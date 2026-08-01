@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.1 - 2026-08-01
+
+- Aligned the candidate protocol with the deployed fail-closed gate: admission
+  now requires a recognized terminal finish reason, not merely a reason other
+  than `length`.
+- Added a deterministic fully parseable batch with an unknown finish reason;
+  the sequential baseline executes it and the candidate rejects it.
+- Added a sanitized production-bound receipt covering the real streaming
+  adapter, real admission policy, fixture-only rejection effects, one live
+  read-only dispatch, 310 focused regressions, and measured admission overhead.
+- Narrowed the remaining limitation to exhaustive live-model fault replay and
+  recovery quality. The private production runtime remains undistributed.
+
 ## 0.2.0 - 2026-08-01
 
 - Added a stop-reason admission gate. Admission now requires a terminal finish

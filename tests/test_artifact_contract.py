@@ -88,6 +88,24 @@ def test_framework_replay_receipt_matches_release_files() -> None:
     assert verification["candidate_output"]["sha256"] == reference["sha256"]
 
 
+def test_production_admission_receipt_matches_bounded_claim() -> None:
+    receipt = load_json("artifact/results/production_admission_canary.json")
+    assert receipt["artifact_version"] == RELEASE
+    assert receipt["format"] == "failure_atomic_production_admission_receipt/v1"
+    assert receipt["verdict"] == "pass"
+    assert receipt["fixture_only_rejection_test"] is True
+    assert receipt["private_runtime_source_distributed"] is False
+    by_name = {case["name"]: case for case in receipt["fixture_cases"]}
+    assert by_name["valid_prefix_malformed_sibling"]["effects"] == 0
+    assert by_name["complete_frames_length_stop"]["effects"] == 0
+    assert by_name["complete_terminal_batch"]["effects"] == 2
+    live = receipt["live_read_only_canary"]
+    assert live["operational_writes"] == 0
+    assert live["admitted_calls"] == live["dispatched_calls"] == 1
+    for value in receipt["source_bindings"].values():
+        assert re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", value)
+
+
 @pytest.mark.parametrize(
     "name",
     [

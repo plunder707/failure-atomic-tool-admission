@@ -39,7 +39,7 @@ def main() -> None:
         )
     payload = {
         "format": "failure_atomic_tool_admission_manifest/v1",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "files": records,
     }
     OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")

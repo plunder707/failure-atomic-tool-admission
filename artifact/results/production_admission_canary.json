@@ -1,0 +1,58 @@
+{
+  "artifact_version": "0.2.1",
+  "claim_boundary": "Production-bound adapter and admission-policy canary with fixture-only rejection effects, plus one live read-only accepted dispatch. This is not exhaustive live-model fault replay.",
+  "fixture_cases": [
+    {
+      "admitted_calls": 0,
+      "batch_width": 2,
+      "effects": 0,
+      "finish_reason": "tool_calls",
+      "name": "valid_prefix_malformed_sibling",
+      "reason": "malformed_arguments_json",
+      "state": "rejected"
+    },
+    {
+      "admitted_calls": 0,
+      "batch_width": 2,
+      "effects": 0,
+      "finish_reason": "length",
+      "name": "complete_frames_length_stop",
+      "reason": "generation_length",
+      "state": "rejected"
+    },
+    {
+      "admitted_calls": 2,
+      "batch_width": 2,
+      "effects": 2,
+      "finish_reason": "tool_calls",
+      "name": "complete_terminal_batch",
+      "reason": "complete_valid_batch",
+      "state": "accepted"
+    }
+  ],
+  "fixture_only_rejection_test": true,
+  "focused_regression_tests_passed": 310,
+  "format": "failure_atomic_production_admission_receipt/v1",
+  "live_read_only_canary": {
+    "admitted_calls": 1,
+    "dispatched_calls": 1,
+    "finish_reason": "tool_calls",
+    "mode": "enforce",
+    "operational_writes": 0,
+    "reason": "complete_valid_batch",
+    "state": "accepted"
+  },
+  "microbenchmark": {
+    "iterations": 20000,
+    "mean_microseconds_per_two_call_batch": 31.5
+  },
+  "private_runtime_source_distributed": false,
+  "source_bindings": {
+    "admission_policy_sha256": "085f3c7f7d17a67e0576ea0d613e0181c25dbbf004c0fd8da2710926e91aa7a0",
+    "production_canary_receipt_sha256": "9f671ae63389d14795cd66539814102fc51cf1d70ab8791914d62858ee24992f",
+    "runtime_adapter_sha256": "302eca399be1cf6d8784d7c02ac8e473aa27b2454602624e2533b0f82fc55edc",
+    "runtime_commit": "b95868b3214dee31a1a23f88b8f6332e88470fe4",
+    "stream_assembler_sha256": "57ed6d5b86d7bcefec11444172c0d25418a2367b47cb0dc87e5581ab489e8f7c"
+  },
+  "verdict": "pass"
+}

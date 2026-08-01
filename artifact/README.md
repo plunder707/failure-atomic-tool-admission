@@ -23,6 +23,12 @@ temporary output matches the committed result byte-for-byte. The receipt binds
 the requirements, resolved environment, probe source, reference output, and
 ephemeral replay digest.
 
+`results/production_admission_canary.json` is a sanitized, source-bound receipt
+from the deployed runtime. Rejection cases execute only in-memory fixture
+effects; the live accepted-path check uses one read-only diagnostic tool. The
+private application source is not distributed, so this receipt is production
+evidence but not an independently executable public artifact.
+
 The deterministic harness is the primary reproducible artifact. The framework
 probe is a bounded convenience sample. It reports observed behavior and should
 not be interpreted as a population estimate or vulnerability determination.

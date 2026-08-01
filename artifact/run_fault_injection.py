@@ -20,6 +20,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 
+TERMINAL_FINISH_REASONS = frozenset({"stop", "tool_calls"})
+
+
 class AmbiguousExecutionError(RuntimeError):
     """The action may have committed before its acknowledgement failed."""
 
@@ -192,6 +195,7 @@ def run_failure_atomic_candidate(
 
     state = RunState()
     truncated = response.finish_reason == "length"
+    nonterminal = response.finish_reason not in TERMINAL_FINISH_REASONS
 
     # Validation still runs when the turn is truncated, so the record keeps the
     # frame-level diagnostics. Only the admission decision short-circuits.
@@ -204,18 +208,19 @@ def run_failure_atomic_candidate(
             record = _validation_failure_record(response, index=index, exc=exc)
             break
 
-    if record is None and truncated:
-        # Every frame parsed but the turn was cut. Without the stop reason this
-        # is indistinguishable from a finished batch.
+    if record is None and nonterminal:
+        # Every frame parsed but the runtime has no recognized terminal signal.
+        # Without that signal this is indistinguishable from an incomplete batch.
+        error_kind = "TruncatedTurn" if truncated else "NonterminalTurn"
         record = AdmissionRecord(
             state="rejected",
             batch_hash=batch_hash(response),
             batch_width=len(response.tool_calls),
-            error_kind="TruncatedTurn",
+            error_kind=error_kind,
             recovery_message=(
-                "Generation stopped at the output limit, so the action batch "
-                "may be incomplete. No operation was admitted. Reissue the "
-                "intended operations as one complete batch."
+                "Generation did not end with a recognized terminal signal, so "
+                "the action batch may be incomplete. No operation was admitted. "
+                "Reissue the intended operations as one complete batch."
             ),
         )
 
@@ -300,6 +305,9 @@ CASES: dict[str, AssistantResponse] = {
     # after v0.1.0; see CHANGELOG.
     "boundary_truncation_all_parse": AssistantResponse(
         "", "length", (VALID_A, VALID_B)
+    ),
+    "unknown_finish_all_parse": AssistantResponse(
+        "", "transport_unknown", (VALID_A, VALID_B)
     ),
     "ambiguous_after_dispatch": AssistantResponse(
         "Submitting the remote update.",

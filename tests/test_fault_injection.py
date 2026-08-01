@@ -74,6 +74,18 @@ def test_valid_batch_is_admitted_and_executed_in_order() -> None:
     assert len(candidate.effects) == 2
 
 
+def test_unknown_finish_reason_rejects_fully_parseable_batch() -> None:
+    response = AssistantResponse("", "transport_unknown", (VALID_A,))
+
+    candidate = run_failure_atomic_candidate(response)
+
+    assert candidate.effects == []
+    assert candidate.history == []
+    assert candidate.record is not None
+    assert candidate.record.state == "rejected"
+    assert candidate.record.error_kind == "NonterminalTurn"
+
+
 def test_every_nonterminal_argument_byte_cut_is_failure_atomic() -> None:
     result = _run_byte_position_faults()
 

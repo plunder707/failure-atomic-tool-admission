@@ -6,7 +6,7 @@
 Independent Researcher
 GitHub: [plunder707](https://github.com/plunder707)
 
-**Public artifact version 0.2.0, 2026-08-01**
+**Public artifact version 0.2.1, 2026-08-01**
 
 ## Abstract
 
@@ -23,8 +23,8 @@ and its executor.
 
 We define a protocol around one invariant: cognition remains continuous, tool
 admission is atomic, and side effects are committed individually. The protocol
-separates completed narrative content from action frames, rejects any turn
-whose stop reason indicates truncation, validates every call in a batch before
+separates completed narrative content from action frames, requires a recognized
+terminal stop reason, validates every call in a batch before
 admitting any call, derives recovery language from an explicit admission
 record, and detects repeated malformed payloads by hash. The stop-reason gate
 is separate from validation because generation can stop on a valid structural
@@ -44,8 +44,11 @@ executable call could be represented; its provider-adapter behavior remains
 unresolved. The probe reports behavior on exact released paths. It does not
 establish that partial success is unintended, defective, or exploitable. These
 results demonstrate the invariant on the tested boundary harness and show its
-practical relevance through the incident and surface probes. They do not
-establish end-to-end task improvement.
+practical relevance through the incident and surface probes. A production-bound
+canary additionally exercised the deployed streaming adapter and admission
+policy with fixture-only rejection effects, while a live read-only request
+verified one admitted and one dispatched call. These results do not establish
+end-to-end task improvement or exhaustive live-model recovery.
 
 ## 1. Introduction
 
@@ -153,11 +156,12 @@ Validation is necessary but not sufficient. Generation can stop at the output
 limit on a valid structural boundary, between two complete calls rather than
 inside one. Every surviving frame then parses, no parser reports a fault, and
 a gate keyed only on \(\bigwedge_i V(a_i)\) admits a batch the model had not
-finished proposing. Truncation is a property of the turn, not of the frames,
-so the admission condition requires the stop reason as well:
+finished proposing. Completion is a property of the turn, not of the frames,
+so the admission condition requires a recognized terminal reason as well. Let
+\(T\) be the runtime's explicitly recognized terminal finish-reason set:
 
 \[
-\text{admit}(A) \iff F \neq \texttt{length} \;\land\; \bigwedge_{i=1}^{n} V(a_i).
+\text{admit}(A) \iff F \in T \;\land\; \bigwedge_{i=1}^{n} V(a_i).
 \]
 
 This case is more dangerous than a parse failure because it is silent. A
@@ -185,6 +189,7 @@ boundary:
 - output truncation on a valid structural boundary, where every surviving
   frame parses and the incomplete batch is indistinguishable from a finished
   one without the stop reason;
+- an absent or unknown finish reason paired with fully parseable calls;
 - syntactically invalid JSON with a non-length finish reason;
 - missing action identifiers or tool names;
 - valid JSON whose root is not an argument object;
@@ -243,8 +248,9 @@ returned as recovery context.
 
 ### 3.2 Check the stop reason, then prevalidate the complete batch
 
-The first gate is the stop reason. If the turn ended at the output limit, the
-runtime rejects the whole assistant turn without inspecting the frames. A
+The first gate is the stop reason. If the turn did not end with a recognized
+terminal reason, the runtime rejects the whole assistant turn. Validation may
+still run to retain frame-level diagnostics, but it cannot authorize dispatch. A
 parse result cannot establish that the model finished speaking, and a
 truncated batch that happens to cut between calls parses cleanly. Salvaging
 the frames that parsed is exactly how a partial plan reaches dispatch.
@@ -258,7 +264,7 @@ Validation then checks every action before dispatch:
 5. the parsed root is an object;
 6. optional tool-specific schema validation succeeds.
 
-Only if the stop reason is terminal and all calls pass does the runtime append
+Only if the stop reason is recognized as terminal and all calls pass does the runtime append
 the full assistant tool-call message and begin ordered dispatch.
 
 ### 3.3 Record admission and execution separately
@@ -337,7 +343,7 @@ content, but it contributes no executable action frame to history.
 
 ### 4.1 Evidence hierarchy
 
-The study separates four evidence levels.
+The study separates five evidence levels.
 
 1. **Observed incident.** Live endpoint telemetry, server timing, traceback,
    process environment, and surviving filesystem artifacts establish the
@@ -346,11 +352,15 @@ The study separates four evidence levels.
    history admission preceded per-call JSON parsing and dispatch.
 3. **Deterministic counterexample.** A bounded harness reproduces the ordering
    with fake side effects and injected structural failures.
-4. **End-to-end evaluation.** A patched runtime must survive model-generated
-   failures under live replay. This stage remains incomplete.
+4. **Production-bound canary.** The deployed streaming adapter and admission
+   policy must reject injected invalid batches before fixture effects and admit
+   a valid terminal control batch.
+5. **End-to-end evaluation.** A patched runtime must survive model-generated
+   failures under long-horizon live replay. This stage remains incomplete.
 
 The lower stages do not inherit authority from the higher ones. In particular,
-a design that passes the deterministic harness is not yet a production result.
+a design that passes the deterministic harness is not yet a production result,
+and a bounded production canary is not a complete recovery evaluation.
 
 ### 4.2 Fault-injection matrix
 
@@ -366,6 +376,7 @@ The deterministic case matrix covers:
 - malformed arguments with a non-length finish reason;
 - boundary truncation, where two complete calls carry a length finish reason
   and every frame parses;
+- an unknown finish reason paired with two complete calls;
 - an acknowledgement loss after dispatch;
 - an identical malformed retry.
 
@@ -425,7 +436,18 @@ prevents state presence from being mistaken for equivalent replay authority:
 the exact state locations differ, and downstream replay was not established
 for every adapter.
 
-### 4.4 Metrics
+### 4.4 Production-bound runtime canary
+
+The production-bound receipt drives the deployed streaming adapter and
+response-level admission policy. Rejection cases dispatch only in-memory
+fixture functions. It tests a valid-prefix/malformed-sibling batch, two complete
+frames with `finish_reason=length`, and a complete terminal two-call control.
+A separate live request uses one read-only runtime diagnostic and compares the
+admitted-call and dispatched-call counters. Source snapshots and the upstream
+canary are bound by SHA-256. The private application source is not distributed,
+so this evidence is source-bound rather than independently executable here.
+
+### 4.5 Metrics
 
 We report:
 
@@ -438,12 +460,14 @@ We report:
 - valid-batch regression;
 - byte-position partial-effect and history-contamination counts;
 - framework-surface partial-admission observations.
+- production-canary admitted, dispatched, and fixture-effect counts;
+- admission-decision latency for a valid two-call batch.
 
 The end-to-end study will add recovery completion rate, additional model calls,
 latency, token overhead, task completion after recovery, and duplicate external
 effects.
 
-### 4.5 Independent diagnosis
+### 4.6 Independent diagnosis
 
 Agreement between systems that share the same framing is not independent
 evidence. A later diagnostic study will give each evaluator only the symptom,
@@ -475,6 +499,9 @@ executed no action in the valid-then-malformed case, retained completed
 narrative content in all content-plus-malformed cases, classified ambiguous
 post-dispatch failure as unknown, and escalated the second identical malformed
 payload to smaller complete calls. Valid two-call batches completed in order.
+It also rejected a fully parseable two-call batch carrying an unknown finish
+reason, while the sequential baseline executed both calls and reported
+completion.
 
 Byte-position injection tested all 107 nonterminal cuts of the representative
 argument. The baseline executed the preceding valid action and contaminated
@@ -497,10 +524,20 @@ denominator. The observed behavior does not by itself determine whether
 per-call partial success is intended framework policy, a defect, or an
 exploitable vulnerability.
 
+The production-bound artifact is
+`artifact/results/production_admission_canary.json`. The deployed adapter and
+admission policy rejected both the mixed valid/malformed batch and the
+fully-parseable length-terminated batch with zero fixture effects. The valid
+terminal control admitted and executed two fixture calls. A separate live
+read-only request recorded one admitted and one dispatched call. The focused
+runtime regression suite passed 310 tests. A 20,000-iteration local
+microbenchmark measured approximately 31.5 microseconds per valid two-call
+admission decision.
+
 These results demonstrate the invariant on the tested boundary harness and
-show practical relevance through the incident and surface probes. They do
-not measure model behavior, production recovery, or the population frequency
-of malformed output.
+show practical relevance through the incident, surface probes, and bounded
+production canary. They do not measure long-horizon recovery quality or the
+population frequency of malformed output.
 
 ![Byte-position fault matrix](../figures/fault_matrix.svg)
 
@@ -513,14 +550,14 @@ and malformed batch. The separately tested LlamaIndex core boundary
 structurally rejected raw malformed arguments; its provider adapters remain
 unresolved.
 
-## 6. Required End-to-End Evaluation
+## 6. Remaining End-to-End Evaluation
 
 A complete evaluation needs five additional experiments.
 
 ### 6.1 Runtime streaming fault injection
 
-Replay the completed byte-position matrix through the production streaming
-assembler. Vary batch position, finish reason, tool type, and presence of
+Extend the three-case production canary to the completed byte-position matrix.
+Vary batch position, finish reason, tool type, and presence of
 completed narrative content. Assert that action deltas remain non-executable
 until terminal batch validation, then inspect history, telemetry, and side
 effects after each trial.
@@ -552,9 +589,10 @@ all gains to the complete protocol.
 
 ### 6.5 Performance
 
-Measure validation latency, memory overhead, additional model calls, and
-prompt growth. Prevalidation should be linear in batch bytes and negligible
-relative to generation, but that expectation must be measured.
+Extend the measured admission-decision latency to varying batch widths and
+payload sizes, then measure memory overhead, additional recovery calls, and
+prompt growth. The current two-call microbenchmark establishes only that the
+local validation cost is negligible relative to model and tool latency.
 
 ## 7. Related Work
 
@@ -592,8 +630,8 @@ rolled back.
 
 The current evidence contains one production incident, a deterministic
 boundary harness, exhaustive truncation of one representative payload, five
-pinned executable-path probes, and one separately interpreted typed-boundary
-probe. All five executable paths admitted a valid call before handling a
+pinned executable-path probes, one separately interpreted typed-boundary probe,
+and one three-case production-bound runtime canary. All five executable paths admitted a valid call before handling a
 malformed peer, but this convenience sample is not a population-frequency
 estimate. It does not cover every framework release, configuration, provider
 adapter, language implementation, or custom execution loop. Several tested
@@ -609,11 +647,13 @@ end-to-end adapter tests are required before describing any individual result
 as a framework defect or security vulnerability.
 
 The boundary harness mirrors the source ordering but is not the production
-runtime. It does not evaluate semantic argument validity, authorization,
-malicious tools, concurrent dispatch, or distributed transactions. The
-production streaming assembler has not yet been replayed against the
-byte-position matrix, so buffering of action deltas remains a design
-requirement rather than a verified runtime property.
+runtime. The production canary covers one malformed-sibling batch, one
+fully-parseable length-terminated batch, and one valid control, but not the
+107-position matrix or long-horizon model recovery. It does not evaluate
+semantic argument validity, authorization, malicious tools, concurrent
+dispatch, or distributed transactions. The production source is private and
+bound only by hashes in the public receipt, so independent reproduction of that
+canary requires access to the application runtime.
 
 Content-action splitting assumes narrative content is independently complete.
 A model may refer to an action that was rejected, leaving the retained text

@@ -1,62 +1,49 @@
-# Release v0.2.0
+# Release v0.2.1
 
-This release adds a stop-reason admission gate. Admission now requires a
-terminal finish reason in addition to full batch validation.
+This release binds the protocol to a deployed completion-aware admission gate.
 
-## What Changed
+## Corrected Admission Condition
 
-Validation alone is not sufficient. Generation can stop at the output limit on
-a valid structural boundary, between two complete calls rather than inside one.
-Every surviving frame then parses, no parser reports a fault, and a gate keyed
-only on validation admits a batch the model had not finished proposing.
+`v0.2.0` rejected `finish_reason=length`, closing the silent boundary-cut case.
+The production implementation revealed the stricter condition the protocol
+actually needs:
 
-The sequential baseline executes both calls and records a completed turn with
-no error, which makes this case silent rather than loud. It is more dangerous
-than the parse failure the original release described.
+```text
+admit(A) iff F is a recognized terminal reason AND every V(a_i) passes
+```
 
-The admission condition is now `F != length AND all V(a_i)`. Validation still
-runs on truncated turns so the admission record keeps frame-level diagnostics.
+The released candidate recognizes `stop` and `tool_calls` as terminal. Unknown,
+missing, and output-limit finish reasons fail closed. A new deterministic case
+contains two fully valid calls with an unknown finish reason. The sequential
+baseline executes both calls; the candidate admits neither.
 
-The `boundary_truncation_all_parse` fault case covers it. The 107-position byte
-sweep could not have produced it, because that sweep cuts inside a single
-argument and never between calls. That limitation is now stated in the paper.
+## Production-Bound Evidence
 
-This gap was identified by a public reviewer after v0.1.0 and is credited in
-the manuscript acknowledgements.
+`artifact/results/production_admission_canary.json` records three canary cases
+against the deployed streaming adapter and admission policy:
 
-## Primary Result
+- valid prefix plus malformed sibling: rejected, zero fixture effects;
+- two complete calls plus `finish_reason=length`: rejected, zero fixture effects;
+- complete terminal two-call batch: accepted, two fixture effects.
 
-A sequential tool executor produced a partial effect and malformed executable
-history at every one of 107 nonterminal truncation positions. Whole-batch
-prevalidation reduced both counts to zero while preserving completed narrative
-content. Deterministic case count is now 10.
+A separate live read-only request recorded one admitted call and one dispatched
+call. The focused regression set passed 310 tests. A 20,000-iteration local
+microbenchmark measured about 31.5 microseconds per valid two-call admission
+decision.
 
-## Framework-Surface Probe
+The private application runtime is not distributed. The receipt binds the
+tested source snapshot and upstream canary by commit and SHA-256. This moves the
+claim beyond a reference harness, but it is not exhaustive live-model fault
+replay and does not establish recovery quality across long tasks.
 
-All five pinned executable paths tested partially admitted one valid call
-paired with malformed JSON. A separately tested LlamaIndex typed core boundary
-structurally rejected raw malformed arguments. It is not part of the same
-denominator, and LlamaIndex provider-adapter behavior remains unresolved.
+## Preserved Results
 
-The probe reports exact source-bound behavior. It does not determine whether
-per-call partial success is intended, defective, or exploitable. Several tested
-paths are internal, and the CrewAI path is deprecated.
+- 107 of 107 nonterminal byte cuts caused partial effects in the sequential
+  baseline; zero did so under failure-atomic admission.
+- All five pinned executable framework paths tested showed partial admission.
+- The separately tested LlamaIndex typed core rejected raw malformed arguments;
+  provider-adapter behavior remains unresolved.
 
-## Changes From v0.1.1
-
-- Pinned Python 3.11.14 in the exact replay instructions and GitHub workflow.
-- Preserved the environment lock, source bindings, and result bytes from
-  v0.1.1.
-- Regenerated versioned manuscript, figures, manifest, receipt, and citation
-  metadata.
-
-v0.1.1 remains the claim-correction release. It replaced vulnerability
-terminology, fixed the non-comparable denominator, documented alternative
-per-call semantics, and introduced the mechanically earned replay receipt.
-
-## Evidence Boundary
-
-The release contains an isolated deterministic counterexample, not a completed
-production-runtime evaluation. It does not claim arbitrary rollback or
-ecosystem-wide prevalence. It does not classify any tested framework as a
-security vulnerability.
+No framework is classified as vulnerable. The observed behavior may reflect an
+intentional per-call contract, and the probe remains a bounded convenience
+sample rather than an ecosystem prevalence estimate.
