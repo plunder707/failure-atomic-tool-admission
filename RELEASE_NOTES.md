@@ -1,14 +1,35 @@
 # Release v0.2.0
 
-This release pins Python 3.11.14 across local and GitHub framework replays. The
-deterministic results and scoped scientific claims are unchanged from v0.1.1.
+This release adds a stop-reason admission gate. Admission now requires a
+terminal finish reason in addition to full batch validation.
+
+## What Changed
+
+Validation alone is not sufficient. Generation can stop at the output limit on
+a valid structural boundary, between two complete calls rather than inside one.
+Every surviving frame then parses, no parser reports a fault, and a gate keyed
+only on validation admits a batch the model had not finished proposing.
+
+The sequential baseline executes both calls and records a completed turn with
+no error, which makes this case silent rather than loud. It is more dangerous
+than the parse failure the original release described.
+
+The admission condition is now `F != length AND all V(a_i)`. Validation still
+runs on truncated turns so the admission record keeps frame-level diagnostics.
+
+The `boundary_truncation_all_parse` fault case covers it. The 107-position byte
+sweep could not have produced it, because that sweep cuts inside a single
+argument and never between calls. That limitation is now stated in the paper.
+
+This gap was identified by a public reviewer after v0.1.0 and is credited in
+the manuscript acknowledgements.
 
 ## Primary Result
 
 A sequential tool executor produced a partial effect and malformed executable
 history at every one of 107 nonterminal truncation positions. Whole-batch
 prevalidation reduced both counts to zero while preserving completed narrative
-content.
+content. Deterministic case count is now 10.
 
 ## Framework-Surface Probe
 

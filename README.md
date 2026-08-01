@@ -17,8 +17,16 @@ figures for a narrow execution-safety invariant:
 Tool-using systems often parse and dispatch generated calls sequentially. If a
 response contains one valid call followed by malformed JSON, the first effect
 can commit before the second call fails. This work separates narrative content
-from action frames and validates the complete action batch before admitting
-any call to executable history or dispatch.
+from action frames, rejects any turn whose stop reason indicates truncation,
+and validates the complete action batch before admitting any call to
+executable history or dispatch.
+
+The stop reason is a separate gate from validation. Generation can stop at the
+output limit between two complete calls, in which case every surviving frame
+parses and no parser reports a fault. A gate keyed only on the parse admits
+that batch and executes a plan the model had not finished proposing, with no
+error anywhere. Only the stop reason distinguishes a finished batch from a
+cut one.
 
 ## Results
 
@@ -29,6 +37,10 @@ any call to executable history or dispatch.
 | Cuts contaminating action history | 107 | 0 |
 | Completed narrative retained after rejection | No | Yes |
 | Ambiguous execution reported as unknown | No | Yes |
+| Boundary truncation, two complete calls, length stop | 2 effects, reported complete | 0 effects, rejected |
+
+The last row is the silent case. Both calls parse, the baseline executes them
+and records a completed turn, and nothing raises.
 
 A bounded probe observed partial admission on all five pinned executable paths
 tested. A separately tested LlamaIndex typed core boundary rejected raw
