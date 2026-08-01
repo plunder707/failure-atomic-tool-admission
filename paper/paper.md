@@ -6,7 +6,7 @@
 Independent Researcher
 GitHub: [plunder707](https://github.com/plunder707)
 
-**Public artifact version 0.1.2, 2026-07-30**
+**Public artifact version 0.2.0, 2026-08-01**
 
 ## Abstract
 
@@ -23,9 +23,12 @@ and its executor.
 
 We define a protocol around one invariant: cognition remains continuous, tool
 admission is atomic, and side effects are committed individually. The protocol
-separates completed narrative content from action frames, validates every call
-in a batch before admitting any call, derives recovery language from an
-explicit admission record, and detects repeated malformed payloads by hash.
+separates completed narrative content from action frames, rejects any turn
+whose stop reason indicates truncation, validates every call in a batch before
+admitting any call, derives recovery language from an explicit admission
+record, and detects repeated malformed payloads by hash. The stop-reason gate
+is separate from validation because generation can stop on a valid structural
+boundary, leaving a batch that parses cleanly but is silently incomplete.
 It does not claim transactionality for arbitrary external effects. We motivate
 the design with a production incident in which output truncation produced an
 unterminated JSON argument and an uncaught exception after 30 successful tool
@@ -146,6 +149,21 @@ The property is deliberately narrower than a database transaction. It says
 that validation failure admits no action from the proposed batch. It says
 nothing about undoing calls that were admitted and dispatched successfully.
 
+Validation is necessary but not sufficient. Generation can stop at the output
+limit on a valid structural boundary, between two complete calls rather than
+inside one. Every surviving frame then parses, no parser reports a fault, and
+a gate keyed only on \(\bigwedge_i V(a_i)\) admits a batch the model had not
+finished proposing. Truncation is a property of the turn, not of the frames,
+so the admission condition requires the stop reason as well:
+
+\[
+\text{admit}(A) \iff F \neq \texttt{length} \;\land\; \bigwedge_{i=1}^{n} V(a_i).
+\]
+
+This case is more dangerous than a parse failure because it is silent. A
+malformed frame raises. A cleanly cut batch executes a truncated plan and
+reports success.
+
 ### 2.2 Continuity preservation
 
 If content \(C\) completed independently of the malformed action frame, the
@@ -164,6 +182,9 @@ We consider accidental structural failures at the generation-execution
 boundary:
 
 - output truncation inside an argument string;
+- output truncation on a valid structural boundary, where every surviving
+  frame parses and the incomplete batch is indistinguishable from a finished
+  one without the stop reason;
 - syntactically invalid JSON with a non-length finish reason;
 - missing action identifiers or tool names;
 - valid JSON whose root is not an argument object;
@@ -220,9 +241,15 @@ admission candidates. Completed content can be retained without the action
 frames if action validation fails. Private reasoning is neither persisted nor
 returned as recovery context.
 
-### 3.2 Prevalidate the complete batch
+### 3.2 Check the stop reason, then prevalidate the complete batch
 
-Validation checks every action before dispatch:
+The first gate is the stop reason. If the turn ended at the output limit, the
+runtime rejects the whole assistant turn without inspecting the frames. A
+parse result cannot establish that the model finished speaking, and a
+truncated batch that happens to cut between calls parses cleanly. Salvaging
+the frames that parsed is exactly how a partial plan reaches dispatch.
+
+Validation then checks every action before dispatch:
 
 1. the call identifier is present;
 2. the tool name is a non-empty string;
@@ -231,8 +258,8 @@ Validation checks every action before dispatch:
 5. the parsed root is an object;
 6. optional tool-specific schema validation succeeds.
 
-Only if all calls pass does the runtime append the full assistant tool-call
-message and begin ordered dispatch.
+Only if the stop reason is terminal and all calls pass does the runtime append
+the full assistant tool-call message and begin ordered dispatch.
 
 ### 3.3 Record admission and execution separately
 
@@ -337,6 +364,8 @@ The deterministic case matrix covers:
 - scalar JSON arguments;
 - a missing tool name;
 - malformed arguments with a non-length finish reason;
+- boundary truncation, where two complete calls carry a length finish reason
+  and every frame parses;
 - an acknowledgement loss after dispatch;
 - an identical malformed retry.
 
@@ -345,6 +374,11 @@ runs would not add statistical information. In addition, one representative
 108-byte argument is truncated at each of its 107 nonterminal byte positions.
 Every prefix is placed after one valid call, which tests whether fault position
 changes partial admission or history contamination.
+
+The byte-position sweep cuts inside a single argument, so it cannot produce a
+boundary truncation. That limitation is why the case was absent from v0.1.0
+and is stated here rather than left implicit. A sweep over multi-call payload
+positions would generate it directly and is the natural extension.
 
 ### 4.3 Bounded framework-surface behavior probe
 
@@ -595,7 +629,15 @@ Finally, the terminology of cognition is functional, not ontological.
 Continuity here means preservation of completed task-relevant content and
 state, not a claim about consciousness or personhood.
 
-## 9. Artifact and Availability
+## 9. Acknowledgements
+
+The boundary-truncation case in Sections 2.1, 2.3, 3.2 and 4.2 was identified
+by a public reviewer after the v0.1.0 release, who observed that the stop
+reason and the parse result are different events and that keying admission on
+the parse alone leaves cleanly cut batches undetected. That correction is
+incorporated in v0.2.0.
+
+## 10. Artifact and Availability
 
 The manuscript, deterministic harness, framework probes, exact result
 artifacts, figure-generation code, and tests are available at:
@@ -606,7 +648,7 @@ The tagged release is the unit of citation. Code and executable artifacts are
 licensed under Apache License 2.0. The manuscript, figures, and documentation
 are licensed under Creative Commons Attribution 4.0 International.
 
-## 10. Conclusion
+## 11. Conclusion
 
 For a correlated or mutating tool batch, malformed output should not be handled
 as ordinary conversational text or as the first failed command in a sequential

@@ -1,6 +1,6 @@
 # Continuous Cognition, Failure-Atomic Actuation
 
-[![Release](https://img.shields.io/badge/release-v0.1.2-2E7D5B)](RELEASE_NOTES.md)
+[![Release](https://img.shields.io/badge/release-v0.2.0-2E7D5B)](RELEASE_NOTES.md)
 [![Code license](https://img.shields.io/badge/code-Apache--2.0-2C6E9F)](LICENSE)
 [![Paper license](https://img.shields.io/badge/paper-CC%20BY%204.0-B94343)](LICENSES/CC-BY-4.0.txt)
 

@@ -25,7 +25,7 @@ GREEN = "#2E7D5B"
 PALE_GREEN = "#E8F3ED"
 GRAY = "#5D6872"
 LIGHT = "#F4F6F7"
-matplotlib.rcParams["svg.hashsalt"] = "failure-atomic-tool-admission-v0.1.2"
+matplotlib.rcParams["svg.hashsalt"] = "failure-atomic-tool-admission-v0.2.0"
 
 
 def save_all(fig: plt.Figure, name: str) -> None:
@@ -38,12 +38,12 @@ def save_all(fig: plt.Figure, name: str) -> None:
             metadata = {
                 "Title": name.replace("_", " ").title(),
                 "Author": "Andrew Gracey",
-                "Creator": "failure-atomic-tool-admission v0.1.2",
+                "Creator": "failure-atomic-tool-admission v0.2.0",
                 "CreationDate": fixed,
                 "ModDate": fixed,
             }
         else:
-            metadata = {"Software": "failure-atomic-tool-admission v0.1.2"}
+            metadata = {"Software": "failure-atomic-tool-admission v0.2.0"}
         output = FIGURES / f"{name}.{suffix}"
         fig.savefig(
             output,
@@ -404,7 +404,7 @@ def social_preview() -> None:
         FIGURES / "social_preview.png",
         dpi=100,
         facecolor="white",
-        metadata={"Software": "failure-atomic-tool-admission v0.1.2"},
+        metadata={"Software": "failure-atomic-tool-admission v0.2.0"},
     )
     plt.close(fig)
 

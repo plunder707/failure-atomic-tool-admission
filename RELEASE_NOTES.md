@@ -1,4 +1,4 @@
-# Release v0.1.2
+# Release v0.2.0
 
 This release pins Python 3.11.14 across local and GitHub framework replays. The
 deterministic results and scoped scientific claims are unchanged from v0.1.1.

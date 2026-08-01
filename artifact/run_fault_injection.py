@@ -180,28 +180,62 @@ def run_failure_atomic_candidate(
     prior_failed_hashes: tuple[str, ...] = (),
     max_identical_failures: int = 2,
 ) -> RunState:
-    """Validate the complete batch before history admission or dispatch."""
+    """Validate the complete batch before history admission or dispatch.
+
+    Admission requires a terminal stop reason AND a fully valid batch.
+    Validation alone is not sufficient. Truncation is a property of the turn,
+    not of the individual calls: generation can stop on a valid structural
+    boundary, in which case every surviving call parses and a parse-keyed gate
+    admits a silently incomplete plan. Only the stop reason distinguishes a
+    finished batch from a cut one.
+    """
 
     state = RunState()
+    truncated = response.finish_reason == "length"
+
+    # Validation still runs when the turn is truncated, so the record keeps the
+    # frame-level diagnostics. Only the admission decision short-circuits.
     parsed: list[tuple[str, dict[str, Any]]] = []
+    record: AdmissionRecord | None = None
     for index, call in enumerate(response.tool_calls):
         try:
             parsed.append(parse_call(call))
         except (json.JSONDecodeError, TypeError, ValueError) as exc:
-            if response.content:
-                state.history.append(content_only_history(response))
             record = _validation_failure_record(response, index=index, exc=exc)
-            identical_failures = (
-                sum(1 for digest in prior_failed_hashes if digest == record.batch_hash) + 1
+            break
+
+    if record is None and truncated:
+        # Every frame parsed but the turn was cut. Without the stop reason this
+        # is indistinguishable from a finished batch.
+        record = AdmissionRecord(
+            state="rejected",
+            batch_hash=batch_hash(response),
+            batch_width=len(response.tool_calls),
+            error_kind="TruncatedTurn",
+            recovery_message=(
+                "Generation stopped at the output limit, so the action batch "
+                "may be incomplete. No operation was admitted. Reissue the "
+                "intended operations as one complete batch."
+            ),
+        )
+
+    if record is not None:
+        if truncated:
+            record.error_kind = record.error_kind or "TruncatedTurn"
+        record.preserved_content = bool(response.content)
+        if response.content:
+            state.history.append(content_only_history(response))
+        identical_failures = (
+            sum(1 for digest in prior_failed_hashes if digest == record.batch_hash) + 1
+        )
+        if identical_failures >= max_identical_failures:
+            record.escalation = "require_smaller_complete_calls"
+            record.recovery_message = (
+                "The same invalid action batch was rejected again before "
+                "admission. Reissue the operation as smaller complete calls."
             )
-            if identical_failures >= max_identical_failures:
-                record.escalation = "require_smaller_complete_calls"
-                record.recovery_message = (
-                    "The same invalid action batch was rejected again before "
-                    "admission. Reissue the operation as smaller complete calls."
-                )
-            state.record = record
-            return state
+        state.record = record
+        return state
 
     state.history.append(response_for_history(response))
     state.record = AdmissionRecord(
@@ -259,6 +293,14 @@ CASES: dict[str, AssistantResponse] = {
     "scalar_arguments": AssistantResponse("", "tool_calls", (SCALAR_ARGS,)),
     "missing_tool_name": AssistantResponse("", "tool_calls", (MISSING_NAME,)),
     "malformed_non_length": AssistantResponse("", "tool_calls", (MALFORMED,)),
+    # Boundary truncation. Generation stopped at the output limit between two
+    # complete calls, so every surviving call parses and no parser reports a
+    # fault. A validation-keyed gate admits this batch and silently executes a
+    # plan the model had not finished proposing. Reported by a public reviewer
+    # after v0.1.0; see CHANGELOG.
+    "boundary_truncation_all_parse": AssistantResponse(
+        "", "length", (VALID_A, VALID_B)
+    ),
     "ambiguous_after_dispatch": AssistantResponse(
         "Submitting the remote update.",
         "tool_calls",
