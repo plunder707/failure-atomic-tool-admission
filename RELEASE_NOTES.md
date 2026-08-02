@@ -1,6 +1,26 @@
-# Release v0.2.1
+# Release v0.2.2
 
-This release binds the protocol to a deployed completion-aware admission gate.
+This release adds a bounded terminator-last experiment while preserving the
+deployed completion-aware admission gate from v0.2.1.
+
+## Terminator-Last Experiment
+
+The stop reason remains the primary runtime signal. A provider can, however,
+report a terminal stop for a well-formed response that contains only a prefix
+of the intended calls. The new experimental arm requires the action list to end
+with a non-executable `__batch_complete__` frame.
+
+The deterministic result separates three cases:
+
+- a terminal, well-formed suffix cut is rejected because the terminator is
+  absent;
+- a complete but noncompliant batch is also rejected, making the false-reject
+  tradeoff explicit;
+- a silently omitted interior action remains undetectable when the terminator
+  survives.
+
+The experiment therefore detects suffix completeness, not model-intent
+completeness. It is not deployed as a production requirement.
 
 ## Corrected Admission Condition
 
@@ -12,7 +32,7 @@ actually needs:
 admit(A) iff F is a recognized terminal reason AND every V(a_i) passes
 ```
 
-The released candidate recognizes `stop` and `tool_calls` as terminal. Unknown,
+The production candidate recognizes `stop` and `tool_calls` as terminal. Unknown,
 missing, and output-limit finish reasons fail closed. A new deterministic case
 contains two fully valid calls with an unknown finish reason. The sequential
 baseline executes both calls; the candidate admits neither.

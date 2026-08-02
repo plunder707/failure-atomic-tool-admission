@@ -1,10 +1,12 @@
 from artifact.run_fault_injection import (
     AssistantResponse,
+    BATCH_TERMINATOR,
     MALFORMED,
     VALID_A,
     _run_byte_position_faults,
     run_failure_atomic_candidate,
     run_sequential_baseline,
+    run_terminator_candidate,
 )
 
 
@@ -97,3 +99,27 @@ def test_every_nonterminal_argument_byte_cut_is_failure_atomic() -> None:
     )
     assert result["candidate_partial_effect_count"] == 0
     assert result["candidate_history_contamination_count"] == 0
+
+
+def test_terminator_rejects_well_formed_prefix_with_terminal_stop() -> None:
+    response = AssistantResponse("", "tool_calls", (VALID_A,))
+
+    terminal_reason_only = run_failure_atomic_candidate(response)
+    terminator = run_terminator_candidate(response)
+
+    assert len(terminal_reason_only.effects) == 1
+    assert terminator.effects == []
+    assert terminator.record is not None
+    assert terminator.record.error_kind == "MissingBatchTerminator"
+
+
+def test_terminator_is_not_dispatched_as_an_action() -> None:
+    response = AssistantResponse("", "tool_calls", (VALID_A, BATCH_TERMINATOR))
+
+    state = run_terminator_candidate(response)
+
+    assert state.record is not None
+    assert state.record.state == "completed"
+    assert state.record.admitted_calls == 1
+    assert state.record.committed_calls == 1
+    assert len(state.effects) == 1

@@ -1,0 +1,454 @@
+{
+  "cases": [
+    {
+      "case": "complete_compliant_batch",
+      "expected": "accept_two_actions",
+      "sequential_baseline": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "write_file:{\"content\": \"B\", \"path\": \"b\"}",
+          "__batch_complete__:{\"version\": 1}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 3,
+          "batch_hash": "207255f955ea849ce5316e9c8fb56f27afd28555517d53ff1ee6072cba6d0335",
+          "batch_width": 3,
+          "committed_calls": 3,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminal_reason_candidate": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "write_file:{\"content\": \"B\", \"path\": \"b\"}",
+          "__batch_complete__:{\"version\": 1}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 3,
+          "batch_hash": "207255f955ea849ce5316e9c8fb56f27afd28555517d53ff1ee6072cba6d0335",
+          "batch_width": 3,
+          "committed_calls": 3,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminator_candidate": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "write_file:{\"content\": \"B\", \"path\": \"b\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "207255f955ea849ce5316e9c8fb56f27afd28555517d53ff1ee6072cba6d0335",
+          "batch_width": 3,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      }
+    },
+    {
+      "case": "well_formed_suffix_cut_terminal_stop",
+      "expected": "reject_missing_terminator",
+      "sequential_baseline": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 1,
+          "batch_hash": "02602419cac4c716c05fb8703769a5a2705ec58296bc68ddfba707e13ee07ae2",
+          "batch_width": 1,
+          "committed_calls": 1,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminal_reason_candidate": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 1,
+          "batch_hash": "02602419cac4c716c05fb8703769a5a2705ec58296bc68ddfba707e13ee07ae2",
+          "batch_width": 1,
+          "committed_calls": 1,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminator_candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "02602419cac4c716c05fb8703769a5a2705ec58296bc68ddfba707e13ee07ae2",
+          "batch_width": 1,
+          "committed_calls": 0,
+          "error_kind": "MissingBatchTerminator",
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "The action batch did not end with its required completion terminator. No action was admitted.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      }
+    },
+    {
+      "case": "complete_noncompliant_batch",
+      "expected": "false_reject_without_terminator",
+      "sequential_baseline": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "write_file:{\"content\": \"B\", \"path\": \"b\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "88f9028ece5703b6baa9b191d12a73f47da664c32c4f7896d4f83e5028e5c595",
+          "batch_width": 2,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminal_reason_candidate": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "write_file:{\"content\": \"B\", \"path\": \"b\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "88f9028ece5703b6baa9b191d12a73f47da664c32c4f7896d4f83e5028e5c595",
+          "batch_width": 2,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminator_candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "88f9028ece5703b6baa9b191d12a73f47da664c32c4f7896d4f83e5028e5c595",
+          "batch_width": 2,
+          "committed_calls": 0,
+          "error_kind": "MissingBatchTerminator",
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "The action batch did not end with its required completion terminator. No action was admitted.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      }
+    },
+    {
+      "case": "middle_action_silently_omitted",
+      "expected": "undetectable_accept_one_action",
+      "sequential_baseline": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "__batch_complete__:{\"version\": 1}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "921190149cd40bf9a3667a2c9fe17bcd31a717ed6c2dca8e17885d602af59bb9",
+          "batch_width": 2,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminal_reason_candidate": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "__batch_complete__:{\"version\": 1}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "921190149cd40bf9a3667a2c9fe17bcd31a717ed6c2dca8e17885d602af59bb9",
+          "batch_width": 2,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminator_candidate": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 1,
+          "batch_hash": "921190149cd40bf9a3667a2c9fe17bcd31a717ed6c2dca8e17885d602af59bb9",
+          "batch_width": 2,
+          "committed_calls": 1,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      }
+    },
+    {
+      "case": "nonterminal_with_terminator",
+      "expected": "reject_nonterminal_stop",
+      "sequential_baseline": {
+        "crashed": false,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}",
+          "__batch_complete__:{\"version\": 1}"
+        ],
+        "exception": null,
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 2,
+          "batch_hash": "06dc7d23927e4599095237494bdc89e524280beee26a38e4052fc50af00ee736",
+          "batch_width": 2,
+          "committed_calls": 2,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "completed",
+          "unknown_calls": 0
+        }
+      },
+      "terminal_reason_candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "06dc7d23927e4599095237494bdc89e524280beee26a38e4052fc50af00ee736",
+          "batch_width": 2,
+          "committed_calls": 0,
+          "error_kind": "TruncatedTurn",
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "Generation did not end with a recognized terminal signal, so the action batch may be incomplete. No operation was admitted. Reissue the intended operations as one complete batch.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      },
+      "terminator_candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "06dc7d23927e4599095237494bdc89e524280beee26a38e4052fc50af00ee736",
+          "batch_width": 2,
+          "committed_calls": 0,
+          "error_kind": "TruncatedTurn",
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "Generation did not end with a recognized terminal signal, so the action batch may be incomplete. No operation was admitted. Reissue the intended operations as one complete batch.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      }
+    },
+    {
+      "case": "malformed_action_with_terminator",
+      "expected": "reject_malformed_batch",
+      "sequential_baseline": {
+        "crashed": true,
+        "effects": [
+          "write_file:{\"content\": \"A\", \"path\": \"a\"}"
+        ],
+        "exception": "JSONDecodeError:Unterminated string starting at: line 1 column 28 (char 27)",
+        "history_entries": 1,
+        "record": {
+          "admitted_calls": 3,
+          "batch_hash": "f7d59e0612cca02b8294fc456926262f472c32f93e1435d9bfcded244ef772e3",
+          "batch_width": 3,
+          "committed_calls": 1,
+          "error_kind": null,
+          "error_position": null,
+          "escalation": "",
+          "malformed_call_index": null,
+          "malformed_payload_in_history": true,
+          "preserved_content": false,
+          "recovery_message": "",
+          "state": "crashed",
+          "unknown_calls": 0
+        }
+      },
+      "terminal_reason_candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "f7d59e0612cca02b8294fc456926262f472c32f93e1435d9bfcded244ef772e3",
+          "batch_width": 3,
+          "committed_calls": 0,
+          "error_kind": "JSONDecodeError",
+          "error_position": 27,
+          "escalation": "",
+          "malformed_call_index": 1,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "The previous action batch was rejected before admission. No action from that batch was dispatched. Reissue a complete action batch if the operation is still required.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      },
+      "terminator_candidate": {
+        "crashed": false,
+        "effects": [],
+        "exception": null,
+        "history_entries": 0,
+        "record": {
+          "admitted_calls": 0,
+          "batch_hash": "f7d59e0612cca02b8294fc456926262f472c32f93e1435d9bfcded244ef772e3",
+          "batch_width": 3,
+          "committed_calls": 0,
+          "error_kind": "JSONDecodeError",
+          "error_position": 27,
+          "escalation": "",
+          "malformed_call_index": 1,
+          "malformed_payload_in_history": false,
+          "preserved_content": false,
+          "recovery_message": "The previous action batch was rejected before admission. No action from that batch was dispatched. Reissue a complete action batch if the operation is still required.",
+          "state": "rejected",
+          "unknown_calls": 0
+        }
+      }
+    }
+  ],
+  "claim_boundary": "A terminator-last frame detects suffix loss, including a well-formed prefix paired with a terminal provider stop. It does not establish intent completeness when an interior action is omitted and the terminator survives.",
+  "findings": {
+    "middle_omission_detected": false,
+    "noncompliant_complete_batch_false_rejected": true,
+    "stop_reason_still_required": true,
+    "well_formed_suffix_cut_detected": true
+  },
+  "format": "tool_admission_terminator_experiment/v1",
+  "protocol": {
+    "position": "last",
+    "status": "experimental_not_production_required",
+    "terminator_arguments": "{\"version\":1}",
+    "terminator_name": "__batch_complete__"
+  }
+}

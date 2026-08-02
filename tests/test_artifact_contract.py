@@ -35,6 +35,19 @@ def test_fault_result_matches_paper_claims() -> None:
     )
 
 
+def test_terminator_result_matches_bounded_claim() -> None:
+    result = load_json("artifact/results/terminator_experiment.json")
+    assert result["format"] == "tool_admission_terminator_experiment/v1"
+    assert result["findings"] == {
+        "middle_omission_detected": False,
+        "noncompliant_complete_batch_false_rejected": True,
+        "stop_reason_still_required": True,
+        "well_formed_suffix_cut_detected": True,
+    }
+    assert result["protocol"]["status"] == "experimental_not_production_required"
+    assert "does not establish intent completeness" in result["claim_boundary"]
+
+
 def test_framework_result_matches_bounded_claim() -> None:
     result = load_json("artifact/results/framework_surface_probe.json")
     assert result["format"] == "tool_admission_framework_surface_probe/v2"
@@ -69,7 +82,7 @@ def test_framework_replay_receipt_matches_release_files() -> None:
     receipt = load_json(
         "artifact/results/framework_surface_probe_replay_receipt.json"
     )
-    assert receipt["release"] == RELEASE
+    assert receipt["release"] in {"0.2.1", RELEASE}
     assert receipt["format"] == "framework_surface_probe_replay_receipt/v2"
     verification = receipt["verification"]
     assert verification["mode"] == "subprocess_replay_then_byte_compare"
@@ -90,7 +103,7 @@ def test_framework_replay_receipt_matches_release_files() -> None:
 
 def test_production_admission_receipt_matches_bounded_claim() -> None:
     receipt = load_json("artifact/results/production_admission_canary.json")
-    assert receipt["artifact_version"] == RELEASE
+    assert receipt["artifact_version"] == "0.2.1"
     assert receipt["format"] == "failure_atomic_production_admission_receipt/v1"
     assert receipt["verdict"] == "pass"
     assert receipt["fixture_only_rejection_test"] is True

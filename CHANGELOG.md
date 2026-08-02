@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.2 - 2026-08-01
+
+- Added an experimental terminator-last action frame and deterministic cases
+  for a terminal well-formed suffix cut, noncompliant complete output, and
+  silent middle-frame omission.
+- Demonstrated that the terminator catches suffix loss but cannot establish
+  intent completeness when an interior action disappears and the terminator
+  survives.
+- Kept the deployed production invariant unchanged: recognized terminal stop
+  reason plus complete per-call validation.
+- Added the experimental result to the executable artifact and claim-contract
+  tests without relabeling the historical v0.2.1 production canary.
+
 ## 0.2.1 - 2026-08-01
 
 - Aligned the candidate protocol with the deployed fail-closed gate: admission

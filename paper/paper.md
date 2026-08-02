@@ -6,7 +6,7 @@
 Independent Researcher
 GitHub: [plunder707](https://github.com/plunder707)
 
-**Public artifact version 0.2.1, 2026-08-01**
+**Public artifact version 0.2.2, 2026-08-01**
 
 ## Abstract
 
@@ -47,8 +47,10 @@ results demonstrate the invariant on the tested boundary harness and show its
 practical relevance through the incident and surface probes. A production-bound
 canary additionally exercised the deployed streaming adapter and admission
 policy with fixture-only rejection effects, while a live read-only request
-verified one admitted and one dispatched call. These results do not establish
-end-to-end task improvement or exhaustive live-model recovery.
+verified one admitted and one dispatched call. An experimental terminator-last
+control detected suffix loss but not silent middle-frame omission. These
+results do not establish end-to-end task improvement, exhaustive live-model
+recovery, or model-intent completeness.
 
 ## 1. Introduction
 
@@ -98,7 +100,7 @@ This wording separates three obligations.
    back. Recovery must report committed, failed, and unknown outcomes
    truthfully.
 
-This paper makes five contributions.
+This paper makes six contributions.
 
 1. It defines failure-atomic admission for generated tool-call batches and
    distinguishes it from rollback of external effects.
@@ -111,6 +113,8 @@ This paper makes five contributions.
    gates for the end-to-end study.
 5. It measures admission behavior on five pinned executable paths and one
    separately interpreted typed construction boundary.
+6. It evaluates an optional terminator-last frame, showing that suffix loss is
+   detectable in-band while silent middle-frame omission remains unresolved.
 
 ## 2. Problem Formulation
 
@@ -459,9 +463,10 @@ We report:
 - identical-retry escalation success;
 - valid-batch regression;
 - byte-position partial-effect and history-contamination counts;
-- framework-surface partial-admission observations.
+- framework-surface partial-admission observations;
 - production-canary admitted, dispatched, and fixture-effect counts;
-- admission-decision latency for a valid two-call batch.
+- admission-decision latency for a valid two-call batch;
+- terminator suffix-loss detection, false rejection, and middle-omission detection.
 
 The end-to-end study will add recovery completion rate, additional model calls,
 latency, token overhead, task completion after recovery, and duplicate external
@@ -483,6 +488,21 @@ another's outputs. The study will measure whether they independently identify:
 
 This study tests diagnostic generality. It is not evidence for a general law
 of multi-agent intelligence.
+
+### 4.7 Experimental terminator-last control
+
+The supplementary deterministic arm appends a non-executable
+`__batch_complete__` frame after all proposed actions. Admission requires that
+frame to be last, requires its fixed versioned payload, then removes it before
+dispatch. This control detects a well-formed suffix cut even when the provider
+reports a terminal stop, because removing the suffix also removes the
+terminator.
+
+The experiment includes two negative controls. A complete action batch that
+does not follow the terminator convention is rejected, measuring the protocol's
+false-rejection cost. A batch with one silently omitted interior action but an
+intact terminator is admitted, demonstrating that the marker establishes suffix
+completeness rather than model-intent completeness.
 
 ## 5. Results
 
@@ -533,6 +553,14 @@ read-only request recorded one admitted and one dispatched call. The focused
 runtime regression suite passed 310 tests. A 20,000-iteration local
 microbenchmark measured approximately 31.5 microseconds per valid two-call
 admission decision.
+
+The terminator-last artifact is
+`artifact/results/terminator_experiment.json`. The compliant two-action control
+completed without dispatching the terminator. The terminator gate rejected a
+terminal well-formed prefix that the stop-reason-only candidate admitted. It
+also rejected a complete but noncompliant batch. When the middle action was
+silently omitted but the terminator survived, the gate admitted the remaining
+action, preserving the stated intent-completeness limitation.
 
 These results demonstrate the invariant on the tested boundary harness and
 show practical relevance through the incident, surface probes, and bounded
@@ -631,8 +659,9 @@ rolled back.
 The current evidence contains one production incident, a deterministic
 boundary harness, exhaustive truncation of one representative payload, five
 pinned executable-path probes, one separately interpreted typed-boundary probe,
-and one three-case production-bound runtime canary. All five executable paths admitted a valid call before handling a
-malformed peer, but this convenience sample is not a population-frequency
+one three-case production-bound runtime canary, and one six-case experimental
+terminator control. All five executable paths admitted a valid call before
+handling a malformed peer, but this convenience sample is not a population-frequency
 estimate. It does not cover every framework release, configuration, provider
 adapter, language implementation, or custom execution loop. Several tested
 paths are internal methods, and the CrewAI result uses a released but
@@ -655,6 +684,14 @@ dispatch, or distributed transactions. The production source is private and
 bound only by hashes in the public receipt, so independent reproduction of that
 canary requires access to the application runtime.
 
+The terminator-last extension depends on model or provider compliance. It can
+fail loudly on a complete noncompliant batch, and it cannot detect a silently
+omitted middle frame when the terminator remains present. A trusted expected
+count or digest could detect some transport omissions, but it still would not
+prove which actions the model intended to generate. The released experiment
+therefore reports suffix completeness only and does not replace the stop-reason
+gate.
+
 Content-action splitting assumes narrative content is independently complete.
 A model may refer to an action that was rejected, leaving the retained text
 misleading. A conservative implementation may need a content-retention policy
@@ -676,6 +713,9 @@ by a public reviewer after the v0.1.0 release, who observed that the stop
 reason and the parse result are different events and that keying admission on
 the parse alone leaves cleanly cut batches undetected. That correction is
 incorporated in v0.2.0.
+Follow-up public discussion about well-formed shortened lists motivated the
+terminator-last control in v0.2.2. The artifact preserves its false-rejection
+and middle-omission limits rather than treating the marker as an intent proof.
 
 ## 10. Artifact and Availability
 

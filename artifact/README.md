@@ -4,6 +4,10 @@
 failure-atomic protocol. It uses fake local effects and does not touch files,
 services, or networks.
 
+`run_terminator_experiment.py` measures an optional terminator-last extension.
+It demonstrates suffix-loss detection and separately preserves the unresolved
+middle-frame omission and noncompliant-model false-rejection cases.
+
 `run_framework_surface_probe.py` probes five pinned executable paths with the
 same valid-then-malformed action batch. It also records one separately
 interpreted LlamaIndex typed-boundary result. It executes only in-memory test

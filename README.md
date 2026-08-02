@@ -1,6 +1,6 @@
 # Continuous Cognition, Failure-Atomic Actuation
 
-[![Release](https://img.shields.io/badge/release-v0.2.1-2E7D5B)](RELEASE_NOTES.md)
+[![Release](https://img.shields.io/badge/release-v0.2.2-2E7D5B)](RELEASE_NOTES.md)
 [![Code license](https://img.shields.io/badge/code-Apache--2.0-2C6E9F)](LICENSE)
 [![Paper license](https://img.shields.io/badge/paper-CC%20BY%204.0-B94343)](LICENSES/CC-BY-4.0.txt)
 
@@ -25,8 +25,8 @@ The stop reason is a separate gate from validation. Generation can stop at the
 output limit between two complete calls, in which case every surviving frame
 parses and no parser reports a fault. A gate keyed only on the parse admits
 that batch and executes a plan the model had not finished proposing, with no
-error anywhere. Only the stop reason distinguishes a finished batch from a
-cut one.
+error anywhere. The stop reason detects this provider-reported cut; it does not
+prove that a terminal response contains every action the model intended.
 
 ## Results
 
@@ -39,9 +39,18 @@ cut one.
 | Ambiguous execution reported as unknown | No | Yes |
 | Boundary truncation, two complete calls, length stop | 2 effects, reported complete | 0 effects, rejected |
 | Unknown finish reason, two complete calls | 2 effects, reported complete | 0 effects, rejected |
+| Terminal stop, well-formed suffix missing | 1 effect | 0 effects with experimental terminator-last gate |
 
-The final two rows are silent cases. Both calls parse, the baseline executes
-them and records a completed turn, and nothing raises.
+The boundary-truncation and unknown-finish rows are silent cases. Both calls
+parse, the baseline executes them and records a completed turn, and nothing
+raises.
+
+An additional deterministic experiment evaluates a terminator-last frame. It
+detects suffix loss even when the surviving prefix is valid and the provider
+reports a terminal stop. It also measures the tradeoff: a complete but
+noncompliant batch is rejected, and silent omission of an interior action
+remains undetectable when the terminator survives. The terminator protocol is
+experimental and is not required by the deployed v0.2.1 production gate.
 
 A bounded probe observed partial admission on all five pinned executable paths
 tested. A separately tested LlamaIndex typed core boundary rejected raw
@@ -72,6 +81,7 @@ The deterministic boundary experiment needs only Python 3.10 or newer:
 
 ```bash
 python artifact/run_fault_injection.py
+python artifact/run_terminator_experiment.py
 pytest -q
 ```
 
@@ -120,6 +130,7 @@ candidate protocol in a deterministic harness. It does not claim:
 - population prevalence across all agent frameworks;
 - end-to-end improvement in model task quality;
 - exhaustive production streaming fault replay or long-horizon recovery quality;
+- proof of model-intent completeness when a terminal provider response silently omits an interior call;
 
 The paper proposes response-level atomic admission for correlated or mutating
 calls. Per-call partial success can be a reasonable alternative for independent,

@@ -21,6 +21,8 @@ from typing import Any, Callable
 
 
 TERMINAL_FINISH_REASONS = frozenset({"stop", "tool_calls"})
+BATCH_TERMINATOR_NAME = "__batch_complete__"
+BATCH_TERMINATOR_VERSION = 1
 
 
 class AmbiguousExecutionError(RuntimeError):
@@ -277,12 +279,82 @@ def run_failure_atomic_candidate(
     return state
 
 
+def run_terminator_candidate(
+    response: AssistantResponse,
+    *,
+    ambiguous_names: frozenset[str] = frozenset(),
+) -> RunState:
+    """Experimental suffix-completeness gate using a terminator-last frame.
+
+    This detects a well-formed prefix whose suffix, including the terminator,
+    was removed even if a provider reports a terminal stop. It cannot prove
+    intent completeness when an interior action is silently omitted but the
+    terminator survives.
+    """
+
+    full_hash = batch_hash(response)
+    if not response.tool_calls or response.tool_calls[-1].name != BATCH_TERMINATOR_NAME:
+        state = RunState()
+        if response.content:
+            state.history.append(content_only_history(response))
+        state.record = AdmissionRecord(
+            state="rejected",
+            batch_hash=full_hash,
+            batch_width=len(response.tool_calls),
+            error_kind="MissingBatchTerminator",
+            preserved_content=bool(response.content),
+            recovery_message=(
+                "The action batch did not end with its required completion "
+                "terminator. No action was admitted."
+            ),
+        )
+        return state
+
+    terminator = response.tool_calls[-1]
+    try:
+        name, arguments = parse_call(terminator)
+        if name != BATCH_TERMINATOR_NAME:
+            raise ValueError("invalid_batch_terminator_name")
+        if arguments != {"version": BATCH_TERMINATOR_VERSION}:
+            raise ValueError("invalid_batch_terminator_payload")
+    except (json.JSONDecodeError, TypeError, ValueError) as exc:
+        state = RunState()
+        if response.content:
+            state.history.append(content_only_history(response))
+        state.record = _validation_failure_record(
+            response,
+            index=len(response.tool_calls) - 1,
+            exc=exc,
+        )
+        state.record.error_kind = "InvalidBatchTerminator"
+        return state
+
+    action_response = AssistantResponse(
+        content=response.content,
+        finish_reason=response.finish_reason,
+        tool_calls=response.tool_calls[:-1],
+    )
+    state = run_failure_atomic_candidate(
+        action_response,
+        ambiguous_names=ambiguous_names,
+    )
+    assert state.record is not None
+    state.record.batch_hash = full_hash
+    state.record.batch_width = len(response.tool_calls)
+    return state
+
+
 VALID_A = ToolCall("call-a", "write_file", '{"path":"a","content":"A"}')
 VALID_B = ToolCall("call-b", "write_file", '{"path":"b","content":"B"}')
 MALFORMED = ToolCall("call-bad", "write_file", '{"path":"broken","content":"')
 SCALAR_ARGS = ToolCall("call-scalar", "write_file", '"not-an-object"')
 MISSING_NAME = ToolCall("call-name", None, "{}")
 AMBIGUOUS = ToolCall("call-unknown", "network_write", '{"target":"remote"}')
+BATCH_TERMINATOR = ToolCall(
+    "batch-end",
+    BATCH_TERMINATOR_NAME,
+    json.dumps({"version": BATCH_TERMINATOR_VERSION}, separators=(",", ":")),
+)
 
 
 CASES: dict[str, AssistantResponse] = {
